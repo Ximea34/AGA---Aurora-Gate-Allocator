@@ -155,36 +155,31 @@ wake_categories:
   N43: C
   N44: C
 
-# Postes qui se neutralisent mutuellement : si un poste du groupe est occupe,
-# les autres postes du meme groupe sont consideres indisponibles (gros porteur
-# empietant sur les postes voisins).
-# Blocage par PAIRE ADJACENTE uniquement (pas de clique sur tout le groupe) :
-# occuper un poste ne bloque que son(ses) voisin(s) immediat(s) dans la
-# liste, pas les postes "de l'autre cote". Ex: B82 occupe bloque B81 ET B83,
-# mais B81 occupe ne bloque que B82 (pas B83).
-gate_blocking_pairs:
-  - [C81, C82]
-  - [C82, C83]
-  - [D21, D22]
-  - [D22, D23]
-  - [D41, D42]
-  - [D42, D43]
-  - [C21, C22]
-  - [C22, C23]
-  - [C41, C42]
-  - [C42, C43]
-  - [C61, C62]
-  - [C62, C63]
-  - [B61, B62]
-  - [B62, B63]
-  - [B71, B72]
-  - [B72, B73]
-  - [B81, B82]
-  - [B82, B83]
-  - [B91, B92]
-  - [B92, B93]
-  - [M11, M12]
-  - [M12, M13]
+# Postes neutralises par occupation. Relation DIRECTIONNELLE, pas
+# symetrique : "poste occupe -> postes neutralises". Un poste absent des
+# cles ne neutralise rien quand il est occupe (ex: B61 occupe ne bloque
+# rien, mais B62 occupe bloque B61 et B63).
+# Source : LFLL - Postes neutralises par occupation (tableau fourni).
+gate_blocking:
+  B62: [B61, B63]
+  B72: [B71, B73]
+  B73: [B71, B72]
+  B82: [B81, B83]
+  B92: [B91, B93]
+  C19: [B92, B93, C21, C22, C23, C41]
+  C22: [C21, C23]
+  C42: [C41, C43]
+  C62: [C61, C63]
+  C81: [C82]
+  C82: [C81, C83]
+  C83: [C82]
+  D21: [D22]
+  D22: [D21, D23]
+  D41: [D42]
+  D42: [D41, D43]
+  D43: [D42]
+  J14: [J13, J15]
+  M12: [M11, M13]
 
 # Groupes de postes avec une regle de compagnie commune. Un groupe sans
 # "airlines" (ou liste vide) est ouvert a toute compagnie (filtre uniquement

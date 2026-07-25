@@ -42,18 +42,10 @@ function loadAirport(icao) {
   const closedSet = new Set(config.closed_gates || []);
   const wakeCategories = config.wake_categories || {};
 
-  // Blocage par paire adjacente uniquement (pas de clique sur tout le
-  // groupe) : chaque paire [a, b] signifie "a occupe bloque b, et
-  // b occupe bloque a", sans transitivite vers d'autres membres du meme
-  // ilot de postes.
-  const linkedGatesByGate = new Map();
-  for (const [a, b] of config.gate_blocking_pairs || []) {
-    for (const [gateId, other] of [[a, b], [b, a]]) {
-      const existing = linkedGatesByGate.get(gateId) || [];
-      if (!existing.includes(other)) existing.push(other);
-      linkedGatesByGate.set(gateId, existing);
-    }
-  }
+  // Blocage DIRECTIONNEL : gate_blocking associe un poste occupe a la
+  // liste des postes qu'il neutralise. Pas de symetrie implicite - un
+  // poste absent des cles ne neutralise rien quand il est occupe.
+  const linkedGatesByGate = new Map(Object.entries(config.gate_blocking || {}));
 
   const groupByGate = new Map();
   for (const [groupKey, group] of Object.entries(config.gate_groups || {})) {
