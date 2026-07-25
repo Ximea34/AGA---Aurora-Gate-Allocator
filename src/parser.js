@@ -116,9 +116,36 @@ function parseBaylist(line) {
   });
 }
 
+/**
+ * Classifie une ligne brute recue d'Aurora et la parse selon son type.
+ * Retourne toujours { type, raw, ... } avec type parmi :
+ *   'traffic' | 'trpos' | 'flightplan' | 'baylist' | 'error' | 'unknown'
+ */
+function parseLine(line) {
+  const head = line.split(';')[0];
+
+  switch (head) {
+    case '#TR':
+      return { type: 'traffic', raw: line, callsigns: parseTrafficList(line) };
+    case '#TRPOS':
+      return { type: 'trpos', raw: line, record: parseTrpos(line) };
+    case '#FP':
+      return { type: 'flightplan', raw: line, record: parseFlightPlan(line) };
+    case '#BAY':
+    case '@BAY':
+      return { type: 'baylist', raw: line, records: parseBaylist(line) };
+    default:
+      if (head.startsWith('$') || head === '@ERR') {
+        return { type: 'error', raw: line };
+      }
+      return { type: 'unknown', raw: line };
+  }
+}
+
 module.exports = {
   parseTrafficList,
   parseTrpos,
   parseFlightPlan,
   parseBaylist,
+  parseLine,
 };
