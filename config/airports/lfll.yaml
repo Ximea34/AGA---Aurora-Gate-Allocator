@@ -19,8 +19,8 @@ reference_point:
 # Criteres de detection "trafic en finale" declenchant la proposition de
 # porte au controleur.
 final_approach_criteria:
-  radius_nm: 3
-  max_altitude_ft: 2000
+  radius_nm: 20 # TEMPORAIRE (test) - valeur normale : 3
+  max_altitude_ft: 7000 # TEMPORAIRE (test) - valeur normale : 2000
 
 # Postes fermes / hors service (ne jamais proposer)
 closed_gates:
@@ -165,9 +165,9 @@ gate_blocking_groups:
   - [B71, B73]
   - [B81, B83]
   - [B91, B93]
-  - [C21, C23]
-  - [C41, C43]
-  - [C61, C63]
+  - [C21, C22, C23]
+  - [C41, C42, C43]
+  - [C61, C62, C63]
   - [M11, M13]
 
 # Groupes de postes avec une regle de compagnie commune. Un groupe sans
