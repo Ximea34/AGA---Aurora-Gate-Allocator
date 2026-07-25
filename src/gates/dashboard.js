@@ -32,11 +32,23 @@ function buildDashboard(aircraftList, airport, assignments, wakeCategories) {
     const speed = Number(aircraft.position.speed);
     const stationary = Number.isFinite(speed) && speed === 0;
 
+    // Suggestions calculees en excluant l'aeronef lui-meme de l'occupation,
+    // pour que sa propre porte (actuelle ou reservee) reste proposable lors
+    // d'une reassignation, quel que soit son espace de travail actuel.
+    const others = aircraftList.filter((a) => a.callsign !== aircraft.callsign);
+    const othersAssignments = new Map(assignments);
+    othersAssignments.delete(aircraft.callsign);
+    const occupancyForSelf = buildOccupancy(others, airport, othersAssignments);
+    const { candidates, warnings } = suggestGates(aircraft, airport, occupancyForSelf, wakeCategories);
+
     const base = {
       callsign: aircraft.callsign,
       aircraftType: aircraft.flightPlan.aircraftIcao,
       departureIcao: aircraft.flightPlan.departureIcao,
       assignedGate: assignedGateId || null,
+      primarySuggestion: candidates[0] || null,
+      secondarySuggestions: candidates.slice(1, 5),
+      warnings,
     };
 
     if (match && stationary) {
@@ -57,16 +69,12 @@ function buildDashboard(aircraftList, airport, assignments, wakeCategories) {
     }
 
     const finalCheck = airport.referencePoint ? isOnFinalApproach(aircraft, airport) : null;
-    const { candidates, warnings } = suggestGates(aircraft, airport, occupancy, wakeCategories);
 
     pending.push({
       ...base,
       distanceNm: finalCheck ? finalCheck.distanceNm : null,
       altitudeFt: finalCheck ? finalCheck.altitudeFt : null,
       onFinal: finalCheck ? finalCheck.onFinal : false,
-      primarySuggestion: candidates[0] || null,
-      secondarySuggestions: candidates.slice(1, 5),
-      warnings,
     });
   }
 

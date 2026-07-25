@@ -165,8 +165,10 @@ function render(snapshot) {
   renderColumn('col-parked', 'count-parked', snapshot.parked, buildParkedRow, 'Aucun trafic stationne');
 
   if (currentModalCallsign) {
-    const stillPending = snapshot.pending.find((p) => p.callsign === currentModalCallsign);
-    if (stillPending) refreshModalSuggestions(stillPending);
+    const allItems = [...snapshot.pending, ...snapshot.taxiAssigned, ...snapshot.parked];
+    const stillTracked = allItems.find((i) => i.callsign === currentModalCallsign);
+    if (stillTracked) refreshModalSuggestions(stillTracked);
+    else closeModal();
   }
 }
 
