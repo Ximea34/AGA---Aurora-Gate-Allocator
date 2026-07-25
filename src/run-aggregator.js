@@ -63,7 +63,10 @@ conn.on('trpos', ({ record }) => {
   store.updatePosition(record);
   checkFinalApproach(record.callsign);
 });
-conn.on('flightplan', ({ record }) => store.updateFlightPlan(record));
+conn.on('flightplan', ({ record }) => {
+  store.updateFlightPlan(record);
+  checkFinalApproach(record.callsign);
+});
 
 conn.on('error', (err) => console.error(`[erreur] ${err.message}`));
 conn.on('close', () => {
