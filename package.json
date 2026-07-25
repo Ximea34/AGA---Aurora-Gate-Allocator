@@ -2,6 +2,7 @@
   "name": "aga-aurora-gate-allocator",
   "version": "0.1.0",
   "description": "Aurora Gate Allocator - client Third Party pour Aurora (IVAO)",
+  "author": "Ximea",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
