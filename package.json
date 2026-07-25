@@ -10,5 +10,8 @@
   "private": true,
   "dependencies": {
     "js-yaml": "^5.2.2"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0"
   }
 }
