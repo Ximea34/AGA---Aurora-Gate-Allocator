@@ -137,6 +137,18 @@ const printTimer = setInterval(() => {
   });
   console.log(`\n--- ${new Date().toISOString()} (${rows.length} aeronefs, aeroport ${airport.icao}) ---`);
   console.table(rows);
+
+  const occupancy = buildOccupancy(store.getAll(), airport);
+  const occupancyRows = Array.from(occupancy.entries()).map(([gateId, info]) => ({
+    poste: gateId,
+    etat: info.occupiedBy ? 'occupe' : 'bloque (voisinage)',
+    occupePar: info.occupiedBy || '',
+    bloquePar: info.blockedBy || '',
+  }));
+  if (occupancyRows.length > 0) {
+    console.log(`--- Occupation des postes (${airport.icao}) ---`);
+    console.table(occupancyRows);
+  }
 }, PRINT_MS);
 
 process.on('SIGINT', () => {
