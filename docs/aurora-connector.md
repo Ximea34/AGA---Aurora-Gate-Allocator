@@ -119,6 +119,17 @@ Champs du Flight Plan Record :
 Utile pour lister les aéronefs à traiter, puis interroger `#FP` et `#TRPOS` pour
 chacun.
 
+## Ecarts constates par rapport a la doc (tests reels du 2026-07-25)
+
+- `#BAY` sans donnee ne repond pas avec le prefixe `#BAY;...` documente, mais
+  avec `@BAY;No data in bay` (identifiant `@` non documente dans la section
+  "Identifier"). A surveiller : le prefixe `@` semble reserve aux reponses
+  "vides"/informatives plutot qu'aux erreurs (`$` documente pour les erreurs).
+- `#TRPOS` et `#FP` correspondent exactement au format documente. Exemple reel
+  valide sur `AFR275` (LFPG -> LFLL, A321) : `currentGate = J35`,
+  `assignedGate` vide (aucune offre de bay active), coherent avec `#BAY` vide
+  au meme instant.
+
 ## Ce qu'il manque pour l'attribution automatique
 
 - Le connecteur ne semble pas exposer de **commande pour définir/écrire**

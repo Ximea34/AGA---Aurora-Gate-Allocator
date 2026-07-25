@@ -99,10 +99,13 @@ function parseFlightPlan(line) {
 
 /**
  * "#BAY;rec1;rec2;..." avec chaque record "sender|receiver|callsign|text1|text2|time|state"
+ *
+ * En pratique, quand aucune donnee n'est disponible, Aurora repond avec le
+ * prefixe non documente "@BAY;No data in bay" plutot que "#BAY;...".
  */
 function parseBaylist(line) {
   const parts = splitArgs(line);
-  const records = parts.slice(1).filter((r) => r.length > 0);
+  const records = parts.slice(1).filter((r) => r.length > 0 && !/^no data/i.test(r));
   return records.map((rec) => {
     const values = rec.split('|');
     const entry = {};
