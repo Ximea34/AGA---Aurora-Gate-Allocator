@@ -1,24 +1,34 @@
 'use strict';
 
 /**
- * Agregateur en memoire du trafic Aurora + proposition de porte.
+ * Agregateur en memoire du trafic Aurora + proposition/attribution de porte.
  *
  * Usage : node src/run-aggregator.js [icao] [host] [port]
  *   ex : node src/run-aggregator.js LFLL
  *
- * Interroge periodiquement #TR pour connaitre le trafic en range, demande
- * #FP et #TRPOS pour chaque nouvel aeronef, rafraichit #TRPOS regulierement,
- * affiche un tableau consolide, et declenche une proposition de porte des
- * qu'un aeronef arrivant sur l'aeroport controle entre en finale (rayon +
- * altitude configures dans config/airports/<icao>.yaml).
+ * - Interroge periodiquement #TR/#FP/#TRPOS pour maintenir l'etat du trafic.
+ * - Des qu'un aeronef arrivant sur l'aeroport controle entre en finale
+ *   (rayon + altitude configures), propose une porte principale + des
+ *   options secondaires (console.log, pas d'attribution automatique).
+ * - Commandes clavier (simulent le clic du controleur, pas encore d'UI) :
+ *     assign CALLSIGN GATE   -> attribue GATE a CALLSIGN
+ *     clear CALLSIGN         -> retire l'attribution
+ *     help                   -> rappel des commandes
+ * - Affiche a intervalle regulier : tableau du trafic (avec etat
+ *   TAXI/WRONG_GATE/CORRECT), occupation des postes, et sequence
+ *   d'atterrissage (plus proche + plus bas en premier).
  */
 
+const readline = require('readline');
 const AuroraConnection = require('./connection');
 const AircraftStore = require('./aircraft-store');
+const AssignmentStore = require('./gates/assignment-store');
 const { loadAirport, loadAircraftWakeCategories } = require('./gates/airport-loader');
 const { buildOccupancy } = require('./gates/occupancy');
 const { isOnFinalApproach } = require('./gates/approach');
 const { suggestGates } = require('./gates/suggest');
+const { computeAircraftState } = require('./gates/state');
+const { buildLandingSequence } = require('./gates/sequence');
 
 const ICAO = (process.argv[2] || 'LFLL').toUpperCase();
 const HOST = process.argv[3] || '127.0.0.1';
@@ -39,12 +49,14 @@ if (!airport.referencePoint) {
 
 const conn = new AuroraConnection(HOST, PORT);
 const store = new AircraftStore();
+const assignments = new AssignmentStore();
 
 /** callsign -> { gateId, proposedAt } pour eviter de reproposer en boucle */
 const proposals = new Map();
 
 conn.on('connect', () => {
   console.log(`Connecte a Aurora sur ${HOST}:${PORT} - aeroport controle : ${airport.icao} (${airport.name})`);
+  console.log('Commandes : "assign CALLSIGN GATE", "clear CALLSIGN", "help"');
   conn.sendCommand('#TR');
 });
 
@@ -56,6 +68,9 @@ conn.on('traffic', ({ callsigns }) => {
   }
   for (const cs of proposals.keys()) {
     if (!callsigns.includes(cs)) proposals.delete(cs);
+  }
+  for (const cs of Array.from(assignments.asMap().keys())) {
+    if (!callsigns.includes(cs)) assignments.clear(cs);
   }
 });
 
@@ -77,7 +92,8 @@ conn.on('close', () => {
 /**
  * Verifie si l'aeronef vient d'entrer dans l'enveloppe "finale" et, si oui,
  * calcule et affiche une proposition de porte (une seule fois par aeronef,
- * tant qu'il reste en range).
+ * tant qu'il reste en range). Ceci est une SUGGESTION : le controleur reste
+ * libre de choisir une autre porte via la commande "assign".
  */
 function checkFinalApproach(callsign) {
   const aircraft = store.get(callsign);
@@ -89,7 +105,7 @@ function checkFinalApproach(callsign) {
   const finalCheck = isOnFinalApproach(aircraft, airport);
   if (!finalCheck || !finalCheck.onFinal) return;
 
-  const occupancy = buildOccupancy(store.getAll(), airport);
+  const occupancy = buildOccupancy(store.getAll(), airport, assignments.asMap());
   const { candidates, warnings } = suggestGates(aircraft, airport, occupancy, wakeCategories);
   const best = candidates[0] || null;
 
@@ -123,6 +139,8 @@ const printTimer = setInterval(() => {
   const rows = store.getAll().map((a) => {
     const finalCheck = a.position ? isOnFinalApproach(a, airport) : null;
     const proposal = proposals.get(a.callsign);
+    const assignedGate = assignments.get(a.callsign);
+    const state = computeAircraftState(a, airport, assignedGate);
     return {
       callsign: a.callsign,
       dep: a.flightPlan ? a.flightPlan.departureIcao : '',
@@ -130,26 +148,68 @@ const printTimer = setInterval(() => {
       aircraft: a.flightPlan ? a.flightPlan.aircraftIcao : '',
       onGround: a.position ? a.position.onGround : '',
       currentGate: a.position ? a.position.currentGate : '',
-      assignedGate: a.position ? a.position.assignedGate : '',
       onFinal: finalCheck ? finalCheck.onFinal : '',
       proposedGate: proposal ? proposal.gateId || '(aucune)' : '',
+      assignedGate: assignedGate || '',
+      state: state || '',
     };
   });
   console.log(`\n--- ${new Date().toISOString()} (${rows.length} aeronefs, aeroport ${airport.icao}) ---`);
   console.table(rows);
 
-  const occupancy = buildOccupancy(store.getAll(), airport);
+  const occupancy = buildOccupancy(store.getAll(), airport, assignments.asMap());
   const occupancyRows = Array.from(occupancy.entries()).map(([gateId, info]) => ({
     poste: gateId,
-    etat: info.occupiedBy ? 'occupe' : 'bloque (voisinage)',
+    etat: info.occupiedBy ? 'occupe' : info.reservedFor ? 'reserve' : 'bloque (voisinage)',
     occupePar: info.occupiedBy || '',
+    reservePour: info.reservedFor || '',
     bloquePar: info.blockedBy || '',
   }));
   if (occupancyRows.length > 0) {
     console.log(`--- Occupation des postes (${airport.icao}) ---`);
     console.table(occupancyRows);
   }
+
+  const sequence = buildLandingSequence(store.getAll(), airport, assignments.asMap());
+  if (sequence.length > 0) {
+    console.log(`--- Sequence d'atterrissage (${airport.icao}) ---`);
+    console.table(
+      sequence.map((e) => ({
+        callsign: e.callsign,
+        distanceNm: e.distanceNm.toFixed(1),
+        altitudeFt: e.altitudeFt,
+        etat: e.state || '',
+      }))
+    );
+  }
 }, PRINT_MS);
+
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+  const parts = line.trim().split(/\s+/);
+  const cmd = (parts[0] || '').toLowerCase();
+
+  if (cmd === 'assign' && parts.length === 3) {
+    const [, callsign, gateId] = parts;
+    if (!store.get(callsign)) {
+      console.log(`[assign] Aeronef inconnu : ${callsign}`);
+      return;
+    }
+    if (!airport.gates.has(gateId)) {
+      console.log(`[assign] Porte inconnue a ${airport.icao} : ${gateId}`);
+      return;
+    }
+    assignments.assign(callsign, gateId);
+    console.log(`[assign] ${callsign} -> ${gateId}`);
+  } else if (cmd === 'clear' && parts.length === 2) {
+    assignments.clear(parts[1]);
+    console.log(`[clear] Attribution retiree pour ${parts[1]}`);
+  } else if (cmd === 'help') {
+    console.log('Commandes : "assign CALLSIGN GATE", "clear CALLSIGN", "help"');
+  } else if (line.trim().length > 0) {
+    console.log(`Commande inconnue : "${line.trim()}" (tape "help")`);
+  }
+});
 
 process.on('SIGINT', () => {
   clearInterval(trafficTimer);
