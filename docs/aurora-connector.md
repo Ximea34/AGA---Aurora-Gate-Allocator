@@ -130,6 +130,21 @@ chacun.
   `assignedGate` vide (aucune offre de bay active), coherent avec `#BAY` vide
   au meme instant.
 
+## Portee des donnees de gate (test agregateur du 2026-07-25)
+
+Sur une session avec 16 aeronefs en range (plusieurs aeroports LFML, LFKF,
+LFGI, LFLL...), seuls les aeronefs au sol a **LFLL** (aeroport controle par
+la position Aurora active, `assumedStation = LFLL_GND`) avaient `currentGate`
+renseigne (`TVF912Z` -> C83, `TSC575` -> D23). Les aeronefs au sol sur
+d'autres terrains (`CCM2TJ` a LFML, `CCM24QO` a LFKF, `FCHPM`/`FCBYP` a
+LFGI) ont `onGround = 1` mais `currentGate` vide.
+
+=> Le connecteur ne fournit les donnees de gate que pour l'aeroport dont le
+layout de parkings est charge dans Aurora, c'est a dire celui controle par
+l'utilisateur. C'est coherent avec l'usage cible d'AGA : l'allocateur ne
+traitera que le trafic arrivant sur l'aeroport controle, pas le trafic en
+route ou au sol ailleurs.
+
 ## Ce qu'il manque pour l'attribution automatique
 
 - Le connecteur ne semble pas exposer de **commande pour définir/écrire**
