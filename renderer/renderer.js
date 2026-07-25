@@ -15,8 +15,7 @@ const STATUS_DOT_CLASS = {
 };
 
 const knownCallsigns = new Set();
-let currentModalCallsign = null;
-let latestSnapshot = null;
+const editingRows = new Set();
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -33,6 +32,104 @@ function setStatus(status) {
 
   document.getElementById('btn-connect').disabled = status === 'connected' || status === 'connecting';
   document.getElementById('btn-disconnect').disabled = status !== 'connected';
+}
+
+/**
+ * Puces de porte cliquables : un clic assigne directement, pas de menu.
+ * La porte courante/assignee est mise en avant (active). Un petit bouton
+ * crayon permet une saisie manuelle inline si la porte voulue n'est pas
+ * dans les suggestions.
+ */
+function buildGateChips(item) {
+  const wrap = el('div');
+
+  const chipsRow = el('div', 'row-gate');
+  const candidates = [];
+  if (item.primarySuggestion) candidates.push(item.primarySuggestion.gateId);
+  for (const s of item.secondarySuggestions || []) {
+    if (!candidates.includes(s.gateId)) candidates.push(s.gateId);
+  }
+  if (item.assignedGate && !candidates.includes(item.assignedGate)) candidates.unshift(item.assignedGate);
+  if (item.currentGate && !candidates.includes(item.currentGate)) candidates.push(item.currentGate);
+
+  for (const gateId of candidates) {
+    const chip = el('button', 'gate-chip-btn', gateId);
+    if (gateId === item.primarySuggestion?.gateId && gateId !== item.assignedGate) {
+      chip.classList.add('primary');
+    }
+    if (gateId === item.assignedGate) chip.classList.add('active');
+    if (item.state === 'WRONG_GATE' && gateId === item.currentGate) chip.classList.add('err');
+    chip.title = gateId === item.assignedGate ? 'Porte assignee' : 'Assigner cette porte';
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.aga.assign(item.callsign, gateId);
+    });
+    chipsRow.appendChild(chip);
+  }
+
+  const editToggle = el('button', 'gate-edit-toggle');
+  editToggle.title = 'Saisie manuelle';
+  editToggle.innerHTML = '<svg viewBox="0 0 16 16"><path d="M11 2l3 3-8 8H3v-3z"/></svg>';
+  editToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleManualEdit(item.callsign, wrap, item);
+  });
+  chipsRow.appendChild(editToggle);
+
+  wrap.appendChild(chipsRow);
+
+  if (editingRows.has(item.callsign)) {
+    wrap.appendChild(buildManualEditRow(item));
+  }
+
+  for (const warning of item.warnings || []) {
+    wrap.appendChild(el('div', 'warning-line', warning));
+  }
+
+  return wrap;
+}
+
+function buildManualEditRow(item) {
+  const row = el('div', 'gate-manual-row');
+  const input = el('input', 'field code');
+  input.placeholder = 'EX: C23';
+  input.value = item.assignedGate || item.currentGate || '';
+  row.appendChild(input);
+
+  const confirm = el('button', 'btn btn-accent', 'OK');
+  confirm.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const gateId = input.value.trim().toUpperCase();
+    if (gateId) window.aga.assign(item.callsign, gateId);
+    editingRows.delete(item.callsign);
+  });
+  row.appendChild(confirm);
+
+  input.addEventListener('click', (e) => e.stopPropagation());
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirm.click();
+    if (e.key === 'Escape') {
+      editingRows.delete(item.callsign);
+      renderLatest();
+    }
+  });
+
+  return row;
+}
+
+function toggleManualEdit(callsign, wrapEl, item) {
+  if (editingRows.has(callsign)) {
+    editingRows.delete(callsign);
+  } else {
+    editingRows.add(callsign);
+  }
+  const existing = wrapEl.querySelector('.gate-manual-row');
+  if (existing) {
+    existing.remove();
+  } else if (editingRows.has(callsign)) {
+    wrapEl.appendChild(buildManualEditRow(item));
+    wrapEl.querySelector('.gate-manual-row input').focus();
+  }
 }
 
 function buildPendingRow(item) {
@@ -58,16 +155,8 @@ function buildPendingRow(item) {
     meta.appendChild(a);
   }
   row.appendChild(meta);
+  row.appendChild(buildGateChips(item));
 
-  const gateRow = el('div', 'row-gate');
-  if (item.primarySuggestion) {
-    gateRow.appendChild(el('span', 'gate-chip', item.primarySuggestion.gateId));
-  } else {
-    gateRow.appendChild(el('span', 'gate-chip err', 'AUCUNE'));
-  }
-  row.appendChild(gateRow);
-
-  row.addEventListener('click', () => openAssignModal(item));
   return row;
 }
 
@@ -79,23 +168,14 @@ function buildTaxiRow(item) {
   top.appendChild(el('span', 'callsign', item.callsign));
   top.appendChild(el('span', 'aircraft-type', item.aircraftType || ''));
   row.appendChild(top);
-
-  const gateRow = el('div', 'row-gate');
-  gateRow.appendChild(el('span', 'gate-chip', item.assignedGate));
-  row.appendChild(gateRow);
+  row.appendChild(buildGateChips(item));
 
   const actions = el('div', 'row-actions');
-  const btnEdit = el('button', 'btn btn-ghost', 'Modifier');
-  btnEdit.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openAssignModal(item);
-  });
   const btnClear = el('button', 'btn btn-ghost', 'Retirer');
   btnClear.addEventListener('click', (e) => {
     e.stopPropagation();
     window.aga.clear(item.callsign);
   });
-  actions.appendChild(btnEdit);
   actions.appendChild(btnClear);
   row.appendChild(actions);
 
@@ -112,24 +192,13 @@ function buildParkedRow(item) {
   top.appendChild(el('span', 'aircraft-type', item.aircraftType || ''));
   row.appendChild(top);
 
-  const gateRow = el('div', 'row-gate');
-  gateRow.appendChild(el('span', `gate-chip ${item.state === 'WRONG_GATE' ? 'err' : ''}`, item.currentGate));
   if (item.state === 'WRONG_GATE') {
-    const note = el('span', 'row-meta', `attendu: ${item.assignedGate}`);
-    gateRow.appendChild(note);
+    row.appendChild(el('div', 'row-meta', `A ${item.currentGate} — attendu ${item.assignedGate}`));
   } else if (item.state === 'UNASSIGNED') {
-    gateRow.appendChild(el('span', 'row-meta', 'non assignee'));
+    row.appendChild(el('div', 'row-meta', `A ${item.currentGate} — non assignee`));
   }
-  row.appendChild(gateRow);
 
-  const actions = el('div', 'row-actions');
-  const btnEdit = el('button', 'btn btn-ghost', 'Reassigner');
-  btnEdit.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openAssignModal(item);
-  });
-  actions.appendChild(btnEdit);
-  row.appendChild(actions);
+  row.appendChild(buildGateChips(item));
 
   return row;
 }
@@ -156,6 +225,8 @@ function renderColumn(containerId, countId, items, builder, emptyMessage) {
   container.scrollTop = scrollTop;
 }
 
+let latestSnapshot = null;
+
 function render(snapshot) {
   latestSnapshot = snapshot;
   document.getElementById('titlebar-icao').textContent = snapshot.icao;
@@ -163,65 +234,10 @@ function render(snapshot) {
   renderColumn('col-pending', 'count-pending', snapshot.pending, buildPendingRow, 'Aucun trafic en approche');
   renderColumn('col-taxi', 'count-taxi', snapshot.taxiAssigned, buildTaxiRow, 'Aucun trafic au roulage');
   renderColumn('col-parked', 'count-parked', snapshot.parked, buildParkedRow, 'Aucun trafic stationne');
-
-  if (currentModalCallsign) {
-    const allItems = [...snapshot.pending, ...snapshot.taxiAssigned, ...snapshot.parked];
-    const stillTracked = allItems.find((i) => i.callsign === currentModalCallsign);
-    if (stillTracked) refreshModalSuggestions(stillTracked);
-    else closeModal();
-  }
 }
 
-function openAssignModal(item) {
-  currentModalCallsign = item.callsign;
-  document.getElementById('modal-callsign').textContent = item.callsign;
-  document.getElementById('modal-manual-input').value = item.assignedGate || item.currentGate || '';
-  refreshModalSuggestions(item);
-  document.getElementById('assign-modal').classList.remove('hidden');
-}
-
-function refreshModalSuggestions(item) {
-  const primaryContainer = document.getElementById('modal-primary');
-  const secondaryContainer = document.getElementById('modal-secondary');
-  const warningsContainer = document.getElementById('modal-warnings');
-  primaryContainer.innerHTML = '';
-  secondaryContainer.innerHTML = '';
-  warningsContainer.innerHTML = '';
-
-  if (item.primarySuggestion) {
-    const btn = el('button', 'btn btn-accent', item.primarySuggestion.gateId);
-    btn.addEventListener('click', () => assignAndClose(item.callsign, item.primarySuggestion.gateId));
-    primaryContainer.appendChild(btn);
-    document.getElementById('modal-primary-block').style.display = '';
-  } else {
-    document.getElementById('modal-primary-block').style.display = 'none';
-  }
-
-  const secondary = item.secondarySuggestions || [];
-  if (secondary.length > 0) {
-    for (const s of secondary) {
-      const btn = el('button', 'btn btn-ghost', s.gateId);
-      btn.addEventListener('click', () => assignAndClose(item.callsign, s.gateId));
-      secondaryContainer.appendChild(btn);
-    }
-    document.getElementById('modal-secondary-block').style.display = '';
-  } else {
-    document.getElementById('modal-secondary-block').style.display = 'none';
-  }
-
-  for (const warning of item.warnings || []) {
-    warningsContainer.appendChild(el('div', 'warning-line', warning));
-  }
-}
-
-async function assignAndClose(callsign, gateId) {
-  const ok = await window.aga.assign(callsign, gateId);
-  if (ok) closeModal();
-}
-
-function closeModal() {
-  currentModalCallsign = null;
-  document.getElementById('assign-modal').classList.add('hidden');
+function renderLatest() {
+  if (latestSnapshot) render(latestSnapshot);
 }
 
 document.getElementById('btn-minimize').addEventListener('click', () => window.aga.windowAction('minimize'));
@@ -239,17 +255,6 @@ document.getElementById('btn-connect').addEventListener('click', () => {
   window.aga.connect(host, port);
 });
 document.getElementById('btn-disconnect').addEventListener('click', () => window.aga.disconnect());
-
-document.getElementById('modal-cancel').addEventListener('click', closeModal);
-document.getElementById('assign-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'assign-modal') closeModal();
-});
-document.getElementById('modal-manual-btn').addEventListener('click', () => {
-  const gateId = document.getElementById('modal-manual-input').value.trim().toUpperCase();
-  if (currentModalCallsign && gateId) {
-    assignAndClose(currentModalCallsign, gateId);
-  }
-});
 
 window.aga.onStatus(setStatus);
 window.aga.onUpdate(render);
