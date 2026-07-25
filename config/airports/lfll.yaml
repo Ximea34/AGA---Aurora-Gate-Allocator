@@ -158,17 +158,31 @@ wake_categories:
 # Postes qui se neutralisent mutuellement : si un poste du groupe est occupe,
 # les autres postes du meme groupe sont consideres indisponibles (gros porteur
 # empietant sur les postes voisins).
-gate_blocking_groups:
-  - [C81, C82, C83]
-  - [D21, D22, D23]
-  - [B61, B63]
-  - [B71, B73]
-  - [B81, B83]
-  - [B91, B93]
-  - [C21, C22, C23]
-  - [C41, C42, C43]
-  - [C61, C62, C63]
-  - [M11, M13]
+# Blocage par PAIRE ADJACENTE uniquement (pas de clique sur tout le groupe) :
+# occuper un poste ne bloque que son(ses) voisin(s) immediat(s) dans la
+# liste, pas les postes "de l'autre cote". Ex: B82 occupe bloque B81 ET B83,
+# mais B81 occupe ne bloque que B82 (pas B83).
+gate_blocking_pairs:
+  - [C81, C82]
+  - [C82, C83]
+  - [D21, D22]
+  - [D22, D23]
+  - [C21, C22]
+  - [C22, C23]
+  - [C41, C42]
+  - [C42, C43]
+  - [C61, C62]
+  - [C62, C63]
+  - [B61, B62]
+  - [B62, B63]
+  - [B71, B72]
+  - [B72, B73]
+  - [B81, B82]
+  - [B82, B83]
+  - [B91, B92]
+  - [B92, B93]
+  - [M11, M12]
+  - [M12, M13]
 
 # Groupes de postes avec une regle de compagnie commune. Un groupe sans
 # "airlines" (ou liste vide) est ouvert a toute compagnie (filtre uniquement
