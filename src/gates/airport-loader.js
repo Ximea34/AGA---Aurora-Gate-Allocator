@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const { loadGtsFile } = require('./gts-loader');
+const { dmsToDecimal } = require('./geo');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
 
@@ -14,6 +15,8 @@ const REPO_ROOT = path.join(__dirname, '..', '..');
  * Retourne :
  * {
  *   icao, name,
+ *   referencePoint: { lat, lon },
+ *   finalApproachCriteria: { radiusNm, maxAltitudeFt },
  *   gates: Map<gateId, {
  *     id, lat, lon, closed, wakeCategory,
  *     group, groupLabel, airlines: string[],
@@ -75,9 +78,21 @@ function loadAirport(icao) {
     });
   }
 
+  const refPoint = config.reference_point;
+  const referencePoint = refPoint
+    ? { lat: dmsToDecimal(refPoint.lat), lon: dmsToDecimal(refPoint.lon) }
+    : null;
+
+  const criteria = config.final_approach_criteria || {};
+
   return {
     icao: config.icao || icao.toUpperCase(),
     name: config.name || '',
+    referencePoint,
+    finalApproachCriteria: {
+      radiusNm: criteria.radius_nm ?? null,
+      maxAltitudeFt: criteria.max_altitude_ft ?? null,
+    },
     gates,
   };
 }

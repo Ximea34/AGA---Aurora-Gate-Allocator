@@ -39,4 +39,10 @@ function distanceMeters(lat1, lon1, lat2, lon2) {
   return EARTH_RADIUS_M * c;
 }
 
-module.exports = { dmsToDecimal, distanceMeters };
+const METERS_PER_NM = 1852;
+
+function distanceNm(lat1, lon1, lat2, lon2) {
+  return distanceMeters(lat1, lon1, lat2, lon2) / METERS_PER_NM;
+}
+
+module.exports = { dmsToDecimal, distanceMeters, distanceNm, METERS_PER_NM };

@@ -10,6 +10,18 @@
 icao: LFLL
 name: Lyon Saint-Exupery
 
+# Point de reference aerodrome (ARP), utilise pour detecter les trafics en
+# finale (rayon + altitude, cf. final_approach_criteria).
+reference_point:
+  lat: N045.43.32.000
+  lon: E005.04.52.000
+
+# Criteres de detection "trafic en finale" declenchant la proposition de
+# porte au controleur.
+final_approach_criteria:
+  radius_nm: 3
+  max_altitude_ft: 2000
+
 # Postes fermes / hors service (ne jamais proposer)
 closed_gates:
   - A21
