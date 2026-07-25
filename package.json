@@ -2,9 +2,11 @@
   "name": "aga-aurora-gate-allocator",
   "version": "0.1.0",
   "description": "Aurora Gate Allocator - client Third Party pour Aurora (IVAO)",
-  "main": "src/aurora-client.js",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "node src/aurora-client.js"
+    "start": "electron .",
+    "cli": "node src/aurora-client.js",
+    "aggregator": "node src/run-aggregator.js"
   },
   "license": "UNLICENSED",
   "private": true,

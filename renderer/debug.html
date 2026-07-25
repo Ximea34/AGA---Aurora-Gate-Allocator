@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>AGA — Debug</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  html, body { height: 100%; display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+  <div class="titlebar">
+    <div class="titlebar-title">Debug — moteur</div>
+    <div class="titlebar-controls">
+      <button class="win-btn" id="btn-clear" title="Vider">
+        <svg viewBox="0 0 16 16"><path d="M3 5h10M6 5V3.5h4V5M4.5 5l.6 8h5.8l.6-8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="win-btn" id="btn-close" title="Fermer">
+        <svg viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="debug-body" id="debug-body" style="user-select: text;"></div>
+  <script src="debug.js"></script>
+</body>
+</html>

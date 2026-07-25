@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>AGA — Aurora Gate Allocator</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="titlebar">
+    <div class="titlebar-title">
+      AGA — Aurora Gate Allocator
+      <span class="icao" id="titlebar-icao">LFLL</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="win-btn" id="btn-debug" title="Fenetre debug">
+        <svg viewBox="0 0 16 16"><path d="M2 3h12M2 8h12M2 13h8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="win-btn" id="btn-pin" title="Epingler au premier plan">
+        <svg viewBox="0 0 16 16"><path d="M8 2v5l3 3H5l3-3z"/><path d="M8 10v4"/></svg>
+      </button>
+      <button class="win-btn" id="btn-minimize" title="Reduire">
+        <svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg>
+      </button>
+      <button class="win-btn" id="btn-maximize" title="Agrandir">
+        <svg viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9"/></svg>
+      </button>
+      <button class="win-btn win-close" id="btn-close" title="Fermer">
+        <svg viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="field-label">Hote</span>
+    <input class="field host" id="input-host" value="127.0.0.1" />
+    <span class="field-label">Port</span>
+    <input class="field port" id="input-port" value="1130" />
+    <button class="btn btn-accent" id="btn-connect">Connecter</button>
+    <button class="btn btn-ghost" id="btn-disconnect" disabled>Deconnecter</button>
+    <div class="spacer"></div>
+    <div class="status">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-label">Deconnecte</span>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column">
+      <div class="column-header">
+        <span class="column-title">Pending — en approche</span>
+        <span class="count" id="count-pending">0</span>
+      </div>
+      <div class="column-body" id="col-pending"></div>
+    </div>
+    <div class="column">
+      <div class="column-header">
+        <span class="column-title">Roulage — porte assignee</span>
+        <span class="count" id="count-taxi">0</span>
+      </div>
+      <div class="column-body" id="col-taxi"></div>
+    </div>
+    <div class="column">
+      <div class="column-header">
+        <span class="column-title">Stationnes</span>
+        <span class="count" id="count-parked">0</span>
+      </div>
+      <div class="column-body" id="col-parked"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="assign-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Attribuer une porte<span class="data" id="modal-callsign"></span></span>
+      </div>
+      <div class="modal-body">
+        <div class="suggestion-block" id="modal-primary-block">
+          <span class="suggestion-label">Suggestion principale</span>
+          <div class="suggestion-list" id="modal-primary"></div>
+        </div>
+        <div class="suggestion-block" id="modal-secondary-block">
+          <span class="suggestion-label">Autres options</span>
+          <div class="suggestion-list" id="modal-secondary"></div>
+        </div>
+        <div class="suggestion-block">
+          <span class="suggestion-label">Attribution manuelle</span>
+          <div class="manual-row">
+            <input class="field code" id="modal-manual-input" placeholder="EX: C23" />
+            <button class="btn btn-accent" id="modal-manual-btn">Assigner</button>
+          </div>
+        </div>
+        <div id="modal-warnings"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modal-cancel">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
