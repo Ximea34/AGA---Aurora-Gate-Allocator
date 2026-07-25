@@ -1,0 +1,266 @@
+# Configuration moteur d'allocation - Lyon Saint-Exupery (LFLL)
+#
+# Sources :
+#   - GATES/lfll.gts                         (coordonnees des postes)
+#   - GATES/GATE_WAKE.txt                     (categorie OACI max par poste, AIP France AD 2 LFLL MIA TEXT 01-04)
+#   - GATES/LFLL_compagnies_terminal_porte.txt (attribution compagnies par terminal, MANEX Aeroports Civils IVAO)
+#
+# Priorite des criteres d'attribution : compagnie > categorie de voilure (wake).
+
+icao: LFLL
+name: Lyon Saint-Exupery
+
+# Postes fermes / hors service (ne jamais proposer)
+closed_gates:
+  - A21
+  - A22
+  - A23
+  - A24
+  - A25
+  - A26
+  - A27
+  - A28
+  - A29
+  - A30
+  - A31
+  - A32
+  - A33
+  - A34
+  - A35
+  - A36
+  - B12
+  - B14
+  - B16
+
+# Categorie OACI max (envergure) par poste. Lettre = code lettre OACI :
+#   A < 15 m | B 15-24 m | C 24-36 m | D 36-52 m | E 52-65 m | F 65-80 m
+wake_categories:
+  A21: C
+  A22: C
+  A23: C
+  A24: C
+  A25: C
+  A26: C
+  A27: C
+  A28: C
+  A29: C
+  A30: C
+  A31: C
+  A32: C
+  A33: C
+  A34: C
+  A35: C
+  A36: C
+  B12: C
+  B14: C
+  B16: C
+  B61: C
+  B62: E
+  B63: C
+  B71: C
+  B72: E
+  B73: C
+  B81: C
+  B82: E
+  B83: D
+  B91: C
+  B92: E
+  B93: D
+  C19: F
+  C21: D
+  C22: E
+  C23: C
+  C41: D
+  C42: E
+  C43: C
+  C61: D
+  C62: E
+  C63: C
+  C81: D
+  C82: F
+  C83: D
+  D21: D
+  D22: F
+  D23: D
+  D41: D
+  D42: F
+  D43: D
+  D61: D
+  D63: D
+  E11: D
+  E13: D
+  E15: C
+  E17: C
+  G11: B
+  G12: B
+  G13: B
+  G14: A
+  G15: B
+  G16: A
+  J11: C
+  J13: C
+  J14: D
+  J15: C
+  J19: D
+  J31: D
+  J33: D
+  J35: D
+  J37: D
+  J39: D
+  J41: D
+  K52: C
+  L11: D
+  L13: D
+  L15: D
+  L17: D
+  L19: D
+  M11: E
+  M12: E # doc source signale 88.40 m, hors code F standard - a verifier
+  M13: E
+  M21: D
+  M22: F
+  M23: D
+  M31: D
+  M32: F
+  M33: D
+  M41: F
+  M42: F
+  M43: D
+  N11: C
+  N12: C
+  N13: C
+  N14: C
+  N21: C
+  N22: C
+  N23: C
+  N24: C
+  N31: C
+  N32: C
+  N33: C
+  N34: C
+  N41: C
+  N42: C
+  N43: C
+  N44: C
+
+# Postes qui se neutralisent mutuellement : si un poste du groupe est occupe,
+# les autres postes du meme groupe sont consideres indisponibles (gros porteur
+# empietant sur les postes voisins).
+gate_blocking_groups:
+  - [C81, C82, C83]
+  - [D21, D22, D23]
+  - [B61, B63]
+  - [B71, B73]
+  - [B81, B83]
+  - [B91, B93]
+  - [C21, C23]
+  - [C41, C43]
+  - [C61, C63]
+  - [M11, M13]
+
+# Groupes de postes avec une regle de compagnie commune. Un groupe sans
+# "airlines" (ou liste vide) est ouvert a toute compagnie (filtre uniquement
+# par categorie de voilure).
+#
+# Le code compagnie correspond au prefixe de callsign tel que recu du
+# connecteur Aurora (ex: callsign "AFR275" -> prefixe "AFR").
+gate_groups:
+  terminal1_c:
+    label: Terminal 1 - postes C (hors C82 et hors C81/C83)
+    gates: [C19, C21, C22, C23, C41, C42, C43, C61, C62, C63]
+    airlines: [AFR, CCM, AUA, ENT, KLM, CLG]
+    # AFR=Air France, CCM=Air Corsica, AUA=Austrian, ENT=Enter Air
+    # (suppose "Ent Air" = Enter Air, a confirmer), KLM=KLM,
+    # CLG=Chalair (code a confirmer)
+
+  terminal1_d:
+    label: Terminal 1 - postes D et C81/C83 (hors C82/D22)
+    gates: [D21, D23, D41, D42, D43, D61, D63, C81, C83]
+    airlines: [DAH, BAW, BEL, IBE, DLH, TAR, THY]
+    # DAH=Air Algerie, BAW=British Airways, BEL=Brussels Airlines
+    # (confirme par trafic reel BEL3580 -> EBBR), IBE=Iberia,
+    # DLH=Lufthansa, TAR=Tunisair, THY=Turkish Airlines
+    # Nouvelair volontairement omis : code ICAO non confirme avec certitude
+
+  terminal1_heavy:
+    label: Terminal 1 - gros porteurs (C82/D22)
+    gates: [C82, D22]
+    airlines: [ACA, UAE, QTR]
+    # ACA=Air Canada, UAE=Emirates, QTR=Qatar Airways
+
+  cargo:
+    label: Cargo (pas de compagnie passagers)
+    gates: [J11, J13, J14, J15, J19]
+    airlines: []
+
+  general_aviation:
+    label: Aviation generale (Parking G)
+    gates: [G11, G12, G13, G14, G15, G16]
+    airlines: []
+
+  # NON RESOLU : la doc source (LFLL_compagnies_terminal_porte.txt) mentionne
+  # "Terminal 2 - tous postes" et "Terminal 3 - tous postes" pour ces
+  # compagnies, sans preciser les postes physiques concernes. Les postes
+  # restants (B61-B93, E, J31-J41, K/L, M, N) sont laisses "non assignes"
+  # (ouverts a toute compagnie, filtre wake uniquement) en attendant cette
+  # information. A completer.
+  unassigned:
+    label: Non assigne - a completer (Terminal 2 / Terminal 3 / autres)
+    gates:
+      - B61
+      - B62
+      - B63
+      - B71
+      - B72
+      - B73
+      - B81
+      - B82
+      - B83
+      - B91
+      - B92
+      - B93
+      - E11
+      - E13
+      - E15
+      - E17
+      - J31
+      - J33
+      - J35
+      - J37
+      - J39
+      - J41
+      - K52
+      - L11
+      - L13
+      - L15
+      - L17
+      - L19
+      - M11
+      - M12
+      - M13
+      - M21
+      - M22
+      - M23
+      - M31
+      - M32
+      - M33
+      - M41
+      - M42
+      - M43
+      - N11
+      - N12
+      - N13
+      - N14
+      - N21
+      - N22
+      - N23
+      - N24
+      - N31
+      - N32
+      - N33
+      - N34
+      - N41
+      - N42
+      - N43
+      - N44
+    airlines: []

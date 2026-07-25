@@ -1,0 +1,88 @@
+LYON SAINT EXUPERY (LFLL) - ATTRIBUTION DES COMPAGNIES PAR TERMINAL ET PAR POSTE
+==================================================================================
+Source : MANEX Aeroports Civils IVAO - LFLL Lyon Saint-Exupery
+(Attribution recommandee des postes en fonction des compagnies reelles)
+
+--------------------------------------------------------------------------------
+TERMINAL 1
+--------------------------------------------------------------------------------
+
+Postes C (hors C82/D22 et hors C81/C83) :
+  - Air France
+  - Air Corsica
+  - Austrian
+  - Ent Air
+  - KLM
+  - Chalair
+
+Postes D et C81/C83 (hors C82/D22) :
+  - Air Algerie
+  - British Airways
+  - Brussels Airlines
+  - Iberia
+  - Lufthansa
+  - Nouvel Air
+  - Tunisair
+  - Turkish Airlines
+
+Postes C82/D22 (gros porteurs) :
+  - Air Canada
+  - Emirates
+  - Qatar Airways
+
+--------------------------------------------------------------------------------
+TERMINAL 2
+--------------------------------------------------------------------------------
+
+Tous postes :
+  - Air Arabia
+  - ASL Airline
+  - British Airways (charter, hiver uniquement)
+  - Volotea
+
+--------------------------------------------------------------------------------
+TERMINAL 3
+--------------------------------------------------------------------------------
+
+Tous postes :
+  - Air France
+  - Aer Lingus
+  - Easyjet
+  - Pegasus
+  - Transavia
+  - Wizz Air
+  - Vueling
+
+--------------------------------------------------------------------------------
+CARGO
+--------------------------------------------------------------------------------
+
+Postes J11 / J13 / J14 / J15 / J19 :
+  - N/A (pas de compagnie passagers attribuee)
+
+--------------------------------------------------------------------------------
+AVIATION GENERALE
+--------------------------------------------------------------------------------
+
+Parking G :
+  - N/A
+
+==================================================================================
+NOTES IMPORTANTES
+==================================================================================
+- Les postes A sont desormais fermes et ne sont plus utilises, ainsi que les
+  postes B12, B14 et B16.
+
+- Les avions gros porteurs occupent deux postes simultanement :
+    * D22 condamne D21 et D23
+    * C82 condamne C81 et C83
+
+- Repoussage interdit (restrictions directionnelles) :
+    * B61 : repoussage interdit face au sud et a l'est
+    * B62, B63 et B71 : repoussage interdit face au sud et a l'ouest
+    * B72 et B73 : repoussage interdit face au sud
+    * J31, K52, L11 et L13 : repoussage interdit face a l'ouest
+
+- Conseil IVAO : pour plus de realisme, assigner dans la mesure du possible
+  une place de stationnement coherente avec la compagnie a l'arrivee, et
+  eviter de faire "rouler a convenance".

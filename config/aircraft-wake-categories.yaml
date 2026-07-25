@@ -1,0 +1,88 @@
+# Reference generique (non liee a un aeroport) : categorie de voilure OACI
+# (code lettre, base sur l'envergure) par type d'aeronef ICAO.
+#
+#   A < 15 m | B 15-24 m | C 24-36 m | D 36-52 m | E 52-65 m | F 65-80 m
+#
+# Valeurs basees sur les envergures publiques constructeur / ICAO Doc 8643.
+# Liste non exhaustive : a completer au fur et a mesure des types rencontres
+# dans le trafic (type ICAO absent => l'engine doit le signaler, pas deviner).
+
+aircraft:
+  # Airbus A220 / A320 family
+  BCS1: C
+  BCS3: C
+  A318: C
+  A319: C
+  A320: C
+  A321: C
+  A19N: C
+  A20N: C
+  A21N: C
+
+  # Airbus long-courrier
+  A332: E
+  A333: E
+  A339: E
+  A342: E
+  A343: E
+  A345: E
+  A346: E
+  A359: E
+  A35K: E
+  A388: F
+
+  # Boeing narrow-body
+  B734: C
+  B735: C
+  B736: C
+  B737: C
+  B738: C
+  B739: C
+  B37M: C
+  B38M: C
+  B39M: C
+
+  # Boeing wide-body
+  B762: D
+  B763: D
+  B764: D
+  B772: E
+  B773: E
+  B77L: E
+  B77W: E
+  B788: E
+  B789: E
+  B78X: E
+  B744: F
+  B748: F
+
+  # Regionaux / turboprop
+  AT43: B
+  AT45: B
+  AT72: C
+  AT73: C
+  AT75: C
+  AT76: C
+  DH8A: B
+  DH8B: B
+  DH8C: B
+  DH8D: C
+  E135: B
+  E145: B
+  E170: C
+  E175: C
+  E190: C
+  E195: C
+  CRJ1: B
+  CRJ2: B
+  CRJ7: C
+  CRJ9: C
+  CRJX: C
+
+  # Aviation d'affaires / generale
+  C700: B
+  C68A: B
+  C56X: B
+  GLF6: C
+  GL5T: B
+  GLID: A

@@ -1,0 +1,180 @@
+LYON SAINT EXUPERY (LFLL) - CATEGORIE OACI MAX PAR POSTE DE STATIONNEMENT
+==========================================================================
+Source : AIP France AD 2 LFLL MIA TEXT 01-04
+Categories code lettre OACI (envergure) :
+  A < 15 m | B 15-24 m | C 24-36 m | D 36-52 m | E 52-65 m | F 65-80 m
+
+--------------------------------------------------------------------------
+AIRE A
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+A21     29.00                C
+A22     34.10                C
+A23     34.10                C
+A24     34.10                C
+A25     24.85                C
+A26     24.85                C
+A27     24.85                C
+A28     24.85                C
+A29     24.85                C
+A30     24.85                C
+A31     24.57                C
+A32     24.57                C
+A33     24.57                C
+A34     24.57                C
+A35     24.57                C
+A36     24.57                C
+
+--------------------------------------------------------------------------
+AIRE B
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+B12     28.08                C
+B14     28.08                C
+B16     28.08                C
+B61     35.99                C
+B62     60.30                E
+B63     35.99                C
+B71     35.99                C
+B72     64.92                E
+B73     35.99                C
+B81     35.99                C
+B82     64.92                E
+B83     41.10                D
+B91     35.99                C
+B92     64.92                E
+B93     47.57                D
+
+--------------------------------------------------------------------------
+AIRE C
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+C19     65.00                F
+C21     41.10                D
+C22     64.92                E
+C23     35.99                C
+C41     41.10                D
+C42     64.92                E
+C43     35.99                C
+C61     41.10                D
+C62     64.92                E
+C63     35.99                C
+C81     36.00                D
+C82     80.00                F (limite haute)
+C83     36.00                D
+
+--------------------------------------------------------------------------
+AIRE D
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+D21     36.00                D
+D22     80.00                F (limite haute)
+D23     36.00                D
+D41     36.00                D
+D42     65.00                F
+D43     36.00                D
+D61     36.00                D
+D63     36.00                D
+
+--------------------------------------------------------------------------
+AIRE E
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+E11     44.83                D
+E13     44.83                D
+E15     35.80                C
+E17     35.99                C
+
+--------------------------------------------------------------------------
+AIRE G (petits porteurs)
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+G11     17.00                B
+G12     17.00                B
+G13     17.00                B
+G14     14.50                A
+G15     17.00                B
+G16     14.50                A
+
+--------------------------------------------------------------------------
+AIRE J
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+J11     35.99                C
+J13     35.99                C
+J14     51.00                D
+J15     35.99                C
+J19     51.00                D
+J31     36.00                D
+J33     36.00                D
+J35     36.00                D
+J37     36.00                D
+J39     36.00                D
+J41     36.00                D
+
+--------------------------------------------------------------------------
+AIRE K / L
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+K52     35.99                C
+L11     36.00                D
+L13     36.00                D
+L15     36.00                D
+L17     36.00                D
+L19     36.00                D
+
+--------------------------------------------------------------------------
+AIRE M (grands porteurs)
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+M11     64.92                E
+M12     88.40                Hors code standard (> code F, 80 m) - a verifier
+M13     64.92                E
+M21     51.90                D
+M22     79.80                F
+M23     51.90                D
+M31     51.90                D
+M32     79.80                F
+M33     51.90                D
+M41     65.00                F
+M42     79.75                F
+M43     51.90                D
+
+--------------------------------------------------------------------------
+AIRE N (postes regionaux)
+--------------------------------------------------------------------------
+Poste   Envergure max (m)   Categorie max
+N11     29.00                C
+N12     29.00                C
+N13     35.99                C
+N14     29.00                C
+N21     29.00                C
+N22     29.00                C
+N23     35.99                C
+N24     29.00                C
+N31     29.00                C
+N32     29.00                C
+N33     35.99                C
+N34     29.00                C
+N41     29.00                C
+N42     29.00                C
+N43     35.99                C
+N44     29.00                C
+
+==========================================================================
+NOTES IMPORTANTES
+==========================================================================
+- M12 affiche 88.40 m d'envergure, ce qui depasse le code F standard OACI
+  (max 80 m). Meme l'A380 (79.75 m) reste en dessous. A verifier / cas
+  particulier possible (poste tres large ou tolerance specifique).
+- C82 et D22 sont a exactement 80 m d'envergure, en limite haute du
+  code F, avec restrictions specifiques mentionnees dans l'AIP pour les
+  codes F (repoussage interdit dans certaines directions).
+- La longueur max doit egalement etre verifiee en complement de
+  l'envergure : certains postes ont une envergure genereuse mais une
+  longueur plus contraignante.
+- Plusieurs postes se neutralisent mutuellement lors de l'occupation
+  par un gros porteur (voir colonne Observations de l'AIP original
+  pour le detail des neutralisations : B61/B63, B71/B73, B81/B83,
+  B91/B93, C21/C23, C41/C43, C61/C63, C81/C83, D21/D23, D41/D43,
+  M11/M13, etc.)
