@@ -6,7 +6,23 @@ const yaml = require('js-yaml');
 const { loadGtsFile } = require('./gts-loader');
 const { dmsToDecimal } = require('./geo');
 
-const REPO_ROOT = path.join(__dirname, '..', '..');
+/**
+ * Racine des donnees (config/ et GATES/). Par defaut le repo courant, pour
+ * que les CLI de dev (run-aggregator.js, tests) continuent de lire les
+ * fichiers du projet sans configuration. L'app Electron packagee appelle
+ * setDataRoot() au demarrage pour lire/ecrire dans le dossier utilisateur
+ * (APPDATA) a la place, afin que la config reste editable sans toucher aux
+ * fichiers installes.
+ */
+let DATA_ROOT = path.join(__dirname, '..', '..');
+
+function setDataRoot(dir) {
+  DATA_ROOT = dir;
+}
+
+function getDataRoot() {
+  return DATA_ROOT;
+}
 
 /**
  * Charge la configuration complete d'un aeroport (icao insensible a la casse) :
@@ -26,8 +42,8 @@ const REPO_ROOT = path.join(__dirname, '..', '..');
  */
 function loadAirport(icao) {
   const lower = icao.toLowerCase();
-  const gtsPath = path.join(REPO_ROOT, 'GATES', `${lower}.gts`);
-  const configPath = path.join(REPO_ROOT, 'config', 'airports', `${lower}.yaml`);
+  const gtsPath = path.join(DATA_ROOT, 'GATES', `${lower}.gts`);
+  const configPath = path.join(DATA_ROOT, 'config', 'airports', `${lower}.yaml`);
 
   if (!fs.existsSync(gtsPath)) {
     throw new Error(`Fichier de coordonnees introuvable: ${gtsPath}`);
@@ -98,7 +114,7 @@ function loadAirport(icao) {
  * Retourne Map<typeIcao, categorie ('A'..'F')>.
  */
 function loadAircraftWakeCategories() {
-  const filePath = path.join(REPO_ROOT, 'config', 'aircraft-wake-categories.yaml');
+  const filePath = path.join(DATA_ROOT, 'config', 'aircraft-wake-categories.yaml');
   const data = yaml.load(fs.readFileSync(filePath, 'utf8'));
   return new Map(Object.entries(data.aircraft || {}));
 }
@@ -110,14 +126,14 @@ function loadAircraftWakeCategories() {
  * Retourne [{ icao, name }, ...].
  */
 function listAvailableAirports() {
-  const airportsDir = path.join(REPO_ROOT, 'config', 'airports');
+  const airportsDir = path.join(DATA_ROOT, 'config', 'airports');
   if (!fs.existsSync(airportsDir)) return [];
 
   const airports = [];
   for (const file of fs.readdirSync(airportsDir)) {
     if (!file.endsWith('.yaml')) continue;
     const icaoGuess = path.basename(file, '.yaml');
-    const gtsPath = path.join(REPO_ROOT, 'GATES', `${icaoGuess}.gts`);
+    const gtsPath = path.join(DATA_ROOT, 'GATES', `${icaoGuess}.gts`);
     if (!fs.existsSync(gtsPath)) continue;
 
     const config = yaml.load(fs.readFileSync(path.join(airportsDir, file), 'utf8'));
@@ -130,4 +146,4 @@ function listAvailableAirports() {
   return airports.sort((a, b) => a.icao.localeCompare(b.icao));
 }
 
-module.exports = { loadAirport, loadAircraftWakeCategories, listAvailableAirports };
+module.exports = { loadAirport, loadAircraftWakeCategories, listAvailableAirports, setDataRoot, getDataRoot };

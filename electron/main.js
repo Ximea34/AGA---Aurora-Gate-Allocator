@@ -3,7 +3,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const GateEngine = require('./engine');
-const { listAvailableAirports } = require('../src/gates/airport-loader');
+const { bootstrapUserData } = require('./user-data');
+const { listAvailableAirports, setDataRoot } = require('../src/gates/airport-loader');
+
+app.setName('AGA - Aurora Gate Allocator');
 
 const DEFAULT_ICAO = 'LFLL';
 const ICAO = process.env.AGA_ICAO || DEFAULT_ICAO;
@@ -12,6 +15,12 @@ let mainWindow = null;
 let debugWindow = null;
 const logBuffer = [];
 const MAX_LOG_LINES = 500;
+
+// La config (config/, GATES/) vit dans le dossier utilisateur (APPDATA) une
+// fois l'app packagee, pour rester editable sans droits admin et sans etre
+// ecrasee a chaque mise a jour.
+const userDataDir = bootstrapUserData();
+setDataRoot(userDataDir);
 
 const engine = new GateEngine(ICAO);
 
