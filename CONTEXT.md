@@ -36,8 +36,12 @@ Dépôt GitHub : https://github.com/Ximea34/AGA---Aurora-Gate-Allocator
 - Le 4ᵉ chiffre `Z` vit dans `package.json.build.buildVersion` (métadonnées
   du binaire Windows de l'installeur). Les deux doivent rester
   synchronisés sur les 3 premiers chiffres.
-- Version actuelle : `1.0.0` / `1.0.0.0` (première version MAIN, pas encore
-  mergée/taguée au moment de la rédaction de cette section).
+- Version actuelle : `1.0.2` / `1.0.2.0`.
+- **Piège important** : `electron-updater` ne compare que les 3 premiers
+  chiffres (`package.json.version`) pour détecter une mise à jour — le `Z`
+  de `buildVersion` seul est invisible pour l'auto-update. Un correctif de
+  bug doit donc toujours bumper `W` (3ᵉ chiffre npm) en plus de `Z`, sinon
+  les utilisateurs déjà installés ne verront jamais la mise à jour proposée.
 
 ## Le connecteur Aurora Third Party
 
