@@ -4,6 +4,9 @@ Logiciel d'attribution automatique des portes (gates) aux aéronefs à l'arrivé
 via le connecteur Third Party d'Aurora (client ATC du réseau IVAO), sur le
 même principe que le projet CoLOA.
 
+<img width="1270" height="790" alt="image" src="https://github.com/user-attachments/assets/9874ffcd-a386-4ff1-ad33-10b7fea01733" />
+
+
 ## État du projet
 
 Moteur d'allocation de portes (LFLL) + interface Electron (3 espaces de
