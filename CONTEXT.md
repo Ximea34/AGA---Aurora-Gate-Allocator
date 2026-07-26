@@ -36,7 +36,7 @@ Dépôt GitHub : https://github.com/Ximea34/AGA---Aurora-Gate-Allocator
 - Le 4ᵉ chiffre `Z` vit dans `package.json.build.buildVersion` (métadonnées
   du binaire Windows de l'installeur). Les deux doivent rester
   synchronisés sur les 3 premiers chiffres.
-- Version actuelle : `1.0.3` / `1.0.3.0`.
+- Version actuelle : `1.1.0` / `1.1.0.0`.
 - **Piège découvert (corrigé en 1.0.3)** : `fs.cpSync` ne peut pas copier
   un dossier situé à l'intérieur de `app.asar` (Electron ne patche que la
   lecture simple, pas la copie récursive). `config/`/`GATES/` sont donc
