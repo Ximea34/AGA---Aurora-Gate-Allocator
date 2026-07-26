@@ -45,6 +45,26 @@ jobs:
             echo "releaseType=release" >> "$GITHUB_OUTPUT"
           fi
 
+      # electron-builder uploade l'installeur+latest.yml et le .blockmap via
+      # deux appels distincts a l'API GitHub. S'il ne trouve pas encore de
+      # Release pour ce tag (latence API juste apres le push du tag), il en
+      # cree une a chaque appel -> deux Releases dupliquees pour le meme
+      # tag (observe sur v1.0.0 et v1.0.1). On cree la Release explicitement
+      # AVANT d'appeler electron-builder pour qu'il la reutilise a coup sur.
+      - name: Pre-create the GitHub Release for this tag
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            extra_flag=""
+            if [ "${{ steps.channel.outputs.releaseType }}" = "prerelease" ]; then
+              extra_flag="--prerelease"
+            fi
+            gh release create "${{ github.ref_name }}" --repo "${{ github.repository }}" \
+              --title "${{ github.ref_name }}" --generate-notes $extra_flag
+          fi
+
       - name: Build and publish to GitHub Releases
         shell: bash
         env:
