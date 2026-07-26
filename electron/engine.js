@@ -35,6 +35,19 @@ class GateEngine extends EventEmitter {
     this.emit('log', `[${new Date().toLocaleTimeString('fr-FR')}] ${message}`);
   }
 
+  /**
+   * Change l'aeroport controle. Les attributions du controleur sont
+   * remises a zero (elles referencent des postes de l'ancien aeroport) ;
+   * le trafic Aurora connu reste en memoire, seule la vue changera.
+   */
+  setAirport(icao) {
+    this.icao = icao.toUpperCase();
+    this.airport = loadAirport(this.icao);
+    this.assignments = new AssignmentStore();
+    this.log(`Aeroport controle : ${this.airport.icao} (${this.airport.name})`);
+    this.pushUpdate();
+  }
+
   setStatus(status) {
     this.status = status;
     this.emit('status', status);

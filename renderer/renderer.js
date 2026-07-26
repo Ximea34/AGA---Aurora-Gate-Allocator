@@ -256,10 +256,28 @@ document.getElementById('btn-connect').addEventListener('click', () => {
 });
 document.getElementById('btn-disconnect').addEventListener('click', () => window.aga.disconnect());
 
+const airportSelect = document.getElementById('select-airport');
+airportSelect.addEventListener('change', () => {
+  window.aga.setAirport(airportSelect.value);
+});
+
+async function initAirportSelect() {
+  const [airports, snapshot] = await Promise.all([window.aga.listAirports(), window.aga.getSnapshot()]);
+  airportSelect.innerHTML = '';
+  for (const airport of airports) {
+    const option = el('option', null, airport.icao);
+    option.value = airport.icao;
+    option.title = airport.name;
+    airportSelect.appendChild(option);
+  }
+  if (snapshot) airportSelect.value = snapshot.icao;
+}
+
 window.aga.onStatus(setStatus);
 window.aga.onUpdate(render);
 
 setStatus('disconnected');
+initAirportSelect();
 window.aga.getSnapshot().then((snapshot) => {
   if (snapshot) render(snapshot);
 });

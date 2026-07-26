@@ -3,8 +3,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const GateEngine = require('./engine');
+const { listAvailableAirports } = require('../src/gates/airport-loader');
 
-const ICAO = process.env.AGA_ICAO || 'LFLL';
+const DEFAULT_ICAO = 'LFLL';
+const ICAO = process.env.AGA_ICAO || DEFAULT_ICAO;
 
 let mainWindow = null;
 let debugWindow = null;
@@ -96,6 +98,15 @@ ipcMain.handle('engine:clear', (event, { callsign }) => {
 });
 
 ipcMain.handle('engine:snapshot', () => {
+  return engine.buildSnapshot();
+});
+
+ipcMain.handle('engine:list-airports', () => {
+  return listAvailableAirports();
+});
+
+ipcMain.handle('engine:set-airport', (event, icao) => {
+  engine.setAirport(icao);
   return engine.buildSnapshot();
 });
 

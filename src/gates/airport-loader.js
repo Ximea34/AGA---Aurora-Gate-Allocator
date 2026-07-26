@@ -103,4 +103,31 @@ function loadAircraftWakeCategories() {
   return new Map(Object.entries(data.aircraft || {}));
 }
 
-module.exports = { loadAirport, loadAircraftWakeCategories };
+/**
+ * Liste les aeroports disponibles : tout fichier config/airports/<icao>.yaml
+ * qui a un fichier GATES/<icao>.gts correspondant.
+ *
+ * Retourne [{ icao, name }, ...].
+ */
+function listAvailableAirports() {
+  const airportsDir = path.join(REPO_ROOT, 'config', 'airports');
+  if (!fs.existsSync(airportsDir)) return [];
+
+  const airports = [];
+  for (const file of fs.readdirSync(airportsDir)) {
+    if (!file.endsWith('.yaml')) continue;
+    const icaoGuess = path.basename(file, '.yaml');
+    const gtsPath = path.join(REPO_ROOT, 'GATES', `${icaoGuess}.gts`);
+    if (!fs.existsSync(gtsPath)) continue;
+
+    const config = yaml.load(fs.readFileSync(path.join(airportsDir, file), 'utf8'));
+    airports.push({
+      icao: config.icao || icaoGuess.toUpperCase(),
+      name: config.name || '',
+    });
+  }
+
+  return airports.sort((a, b) => a.icao.localeCompare(b.icao));
+}
+
+module.exports = { loadAirport, loadAircraftWakeCategories, listAvailableAirports };

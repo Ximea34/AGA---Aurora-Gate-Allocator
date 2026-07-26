@@ -140,7 +140,8 @@ body {
   text-transform: uppercase;
 }
 
-input.field {
+input.field,
+select.field {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -151,12 +152,18 @@ input.field {
   user-select: text;
 }
 
-input.field:focus-visible {
+select.field {
+  cursor: pointer;
+}
+
+input.field:focus-visible,
+select.field:focus-visible {
   outline: 1px solid var(--accent);
   border-color: var(--accent);
 }
 
-input.field.code {
+input.field.code,
+select.field.code {
   text-transform: uppercase;
   width: 90px;
 }

@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('aga', {
   assign: (callsign, gateId) => ipcRenderer.invoke('engine:assign', { callsign, gateId }),
   clear: (callsign) => ipcRenderer.invoke('engine:clear', { callsign }),
   getSnapshot: () => ipcRenderer.invoke('engine:snapshot'),
+  listAirports: () => ipcRenderer.invoke('engine:list-airports'),
+  setAirport: (icao) => ipcRenderer.invoke('engine:set-airport', icao),
 
   onStatus: (callback) => ipcRenderer.on('engine:status', (event, status) => callback(status)),
   onUpdate: (callback) => ipcRenderer.on('engine:update', (event, snapshot) => callback(snapshot)),
