@@ -40,7 +40,7 @@ function setStatus(status) {
  * crayon permet une saisie manuelle inline si la porte voulue n'est pas
  * dans les suggestions.
  */
-function buildGateChips(item) {
+function buildGateChips(item, extraActions) {
   const wrap = el('div');
 
   const chipsRow = el('div', 'row-gate');
@@ -75,6 +75,15 @@ function buildGateChips(item) {
     toggleManualEdit(item.callsign, wrap, item);
   });
   chipsRow.appendChild(editToggle);
+
+  for (const action of extraActions || []) {
+    const btn = el('button', 'btn btn-ghost', action.label);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      action.onClick();
+    });
+    chipsRow.appendChild(btn);
+  }
 
   wrap.appendChild(chipsRow);
 
@@ -132,29 +141,40 @@ function toggleManualEdit(callsign, wrapEl, item) {
   }
 }
 
-function buildPendingRow(item) {
-  const row = el('div', 'row');
-  row.dataset.callsign = item.callsign;
+/**
+ * Ligne meta commune : toujours presente (meme structure dans les 3
+ * colonnes) pour que les etiquettes gardent la meme hauteur. Le contenu
+ * varie selon le contexte mais reste une seule ligne de spans.
+ */
+function buildMetaLine(parts) {
+  const meta = el('div', 'row-meta');
+  for (const part of parts) {
+    const span = el('span');
+    span.appendChild(document.createTextNode(`${part.label} `));
+    span.appendChild(el('span', 'value', part.value));
+    meta.appendChild(span);
+  }
+  return meta;
+}
 
+function buildRowTop(item) {
   const top = el('div', 'row-top');
   top.appendChild(el('span', 'callsign', item.callsign));
   top.appendChild(el('span', 'aircraft-type', item.aircraftType || ''));
-  row.appendChild(top);
+  return top;
+}
 
-  const meta = el('div', 'row-meta');
-  if (item.distanceNm != null) {
-    const d = el('span');
-    d.appendChild(document.createTextNode('DIST '));
-    d.appendChild(el('span', 'value', `${item.distanceNm.toFixed(1)}NM`));
-    meta.appendChild(d);
-  }
-  if (item.altitudeFt != null) {
-    const a = el('span');
-    a.appendChild(document.createTextNode('ALT '));
-    a.appendChild(el('span', 'value', `${item.altitudeFt}FT`));
-    meta.appendChild(a);
-  }
-  row.appendChild(meta);
+function buildPendingRow(item) {
+  const row = el('div', 'row');
+  row.dataset.callsign = item.callsign;
+  row.appendChild(buildRowTop(item));
+
+  const parts = [];
+  if (item.departureIcao) parts.push({ label: 'DEP', value: item.departureIcao });
+  if (item.distanceNm != null) parts.push({ label: 'DIST', value: `${item.distanceNm.toFixed(1)}NM` });
+  if (item.altitudeFt != null) parts.push({ label: 'ALT', value: `${item.altitudeFt}FT` });
+  row.appendChild(buildMetaLine(parts));
+
   row.appendChild(buildGateChips(item));
 
   return row;
@@ -163,21 +183,15 @@ function buildPendingRow(item) {
 function buildTaxiRow(item) {
   const row = el('div', 'row');
   row.dataset.callsign = item.callsign;
+  row.appendChild(buildRowTop(item));
 
-  const top = el('div', 'row-top');
-  top.appendChild(el('span', 'callsign', item.callsign));
-  top.appendChild(el('span', 'aircraft-type', item.aircraftType || ''));
-  row.appendChild(top);
-  row.appendChild(buildGateChips(item));
+  const parts = [];
+  if (item.departureIcao) parts.push({ label: 'DEP', value: item.departureIcao });
+  row.appendChild(buildMetaLine(parts));
 
-  const actions = el('div', 'row-actions');
-  const btnClear = el('button', 'btn btn-ghost', 'Retirer');
-  btnClear.addEventListener('click', (e) => {
-    e.stopPropagation();
-    window.aga.clear(item.callsign);
-  });
-  actions.appendChild(btnClear);
-  row.appendChild(actions);
+  row.appendChild(
+    buildGateChips(item, [{ label: 'Retirer', onClick: () => window.aga.clear(item.callsign) }])
+  );
 
   return row;
 }
@@ -186,17 +200,17 @@ function buildParkedRow(item) {
   const stateClass = item.state === 'CORRECT' ? 'ok' : item.state === 'WRONG_GATE' ? 'err' : '';
   const row = el('div', `row ${stateClass}`);
   row.dataset.callsign = item.callsign;
+  row.appendChild(buildRowTop(item));
 
-  const top = el('div', 'row-top');
-  top.appendChild(el('span', 'callsign', item.callsign));
-  top.appendChild(el('span', 'aircraft-type', item.aircraftType || ''));
-  row.appendChild(top);
-
+  const parts = [];
+  if (item.departureIcao) parts.push({ label: 'DEP', value: item.departureIcao });
   if (item.state === 'WRONG_GATE') {
-    row.appendChild(el('div', 'row-meta', `A ${item.currentGate} — attendu ${item.assignedGate}`));
+    parts.push({ label: 'A', value: item.currentGate });
+    parts.push({ label: 'ATTENDU', value: item.assignedGate });
   } else if (item.state === 'UNASSIGNED') {
-    row.appendChild(el('div', 'row-meta', `A ${item.currentGate} — non assignee`));
+    parts.push({ label: 'A', value: item.currentGate });
   }
+  row.appendChild(buildMetaLine(parts));
 
   row.appendChild(buildGateChips(item));
 
