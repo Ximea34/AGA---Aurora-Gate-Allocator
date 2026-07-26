@@ -66,6 +66,15 @@ conn.on('traffic', ({ callsigns }) => {
     conn.sendCommand(`#FP;${cs}`);
     conn.sendCommand(`#TRPOS;${cs}`);
   }
+  // Relance #FP pour tout aeronef deja connu mais dont le plan de vol
+  // manque encore (reponse perdue lors d'une reconnexion, ligne ratee...).
+  for (const cs of callsigns) {
+    if (newCallsigns.includes(cs)) continue;
+    const aircraft = store.get(cs);
+    if (aircraft && !aircraft.flightPlan) {
+      conn.sendCommand(`#FP;${cs}`);
+    }
+  }
   for (const cs of proposals.keys()) {
     if (!callsigns.includes(cs)) proposals.delete(cs);
   }

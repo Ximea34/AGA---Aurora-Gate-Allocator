@@ -93,6 +93,18 @@ class GateEngine extends EventEmitter {
         this.conn.sendCommand(`#FP;${cs}`);
         this.conn.sendCommand(`#TRPOS;${cs}`);
       }
+      // Relance #FP pour tout aeronef deja connu mais dont le plan de vol
+      // manque encore (reponse perdue lors d'une reconnexion, ligne
+      // ratee...) - sinon il resterait invisible dans les 3 colonnes pour
+      // le reste de la session, sans jamais etre redemande.
+      for (const cs of callsigns) {
+        if (newCallsigns.includes(cs)) continue;
+        const aircraft = this.store.get(cs);
+        if (aircraft && !aircraft.flightPlan) {
+          this.log(`[relance] Plan de vol manquant pour ${cs}, nouvelle demande #FP`);
+          this.conn.sendCommand(`#FP;${cs}`);
+        }
+      }
       for (const cs of Array.from(this.assignments.asMap().keys())) {
         if (!callsigns.includes(cs) && !this.simulated.has(cs)) this.assignments.clear(cs);
       }
