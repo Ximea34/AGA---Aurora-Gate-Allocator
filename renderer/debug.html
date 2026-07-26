@@ -12,7 +12,7 @@
   <div class="titlebar">
     <div class="titlebar-title">Debug — moteur</div>
     <div class="titlebar-controls">
-      <button class="win-btn" id="btn-clear" title="Vider">
+      <button class="win-btn" id="btn-clear-log" title="Vider les logs">
         <svg viewBox="0 0 16 16"><path d="M3 5h10M6 5V3.5h4V5M4.5 5l.6 8h5.8l.6-8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="win-btn" id="btn-close" title="Fermer">
@@ -20,7 +20,86 @@
       </button>
     </div>
   </div>
-  <div class="debug-body" id="debug-body" style="user-select: text;"></div>
+
+  <div class="debug-scroll">
+    <div class="debug-section">
+      <div class="debug-section-title">Simulateur de trafic</div>
+      <div class="sim-grid">
+        <div class="sim-field">
+          <span class="field-label">Indicatif</span>
+          <input class="field code" id="sim-callsign" placeholder="EX: AFR6009" />
+        </div>
+        <div class="sim-field">
+          <span class="field-label">Compagnie</span>
+          <select class="field code" id="sim-airline"></select>
+        </div>
+        <div class="sim-field">
+          <span class="field-label">Type appareil</span>
+          <select class="field code" id="sim-aircraft-type"></select>
+        </div>
+        <div class="sim-field">
+          <span class="field-label">Depart</span>
+          <input class="field code" id="sim-departure" placeholder="EX: LFPG" value="LFPG" />
+        </div>
+
+        <div class="sim-field">
+          <span class="field-label">Rayon (Nm)</span>
+          <input class="field code" id="sim-distance" type="number" min="0" step="0.5" value="15" />
+        </div>
+        <div class="sim-field">
+          <span class="field-label">Cap depuis ARP</span>
+          <input class="field code" id="sim-bearing" type="number" min="0" max="359" step="1" value="0" />
+        </div>
+        <div class="sim-field">
+          <span class="field-label">Altitude (ft)</span>
+          <input class="field code" id="sim-altitude" type="number" min="0" step="100" value="3000" />
+        </div>
+        <div class="sim-field">
+          <span class="field-label">Vitesse (kt)</span>
+          <input class="field code" id="sim-speed" type="number" min="0" step="10" value="250" />
+        </div>
+
+        <div class="sim-field">
+          <span class="field-label">Poste physique (optionnel)</span>
+          <select class="field code" id="sim-gate">
+            <option value="">— aucun (calcule via rayon/cap) —</option>
+          </select>
+        </div>
+        <div class="sim-field checkbox">
+          <input type="checkbox" id="sim-onground" />
+          <span class="field-label">Au sol</span>
+        </div>
+      </div>
+      <div class="sim-actions">
+        <button class="btn btn-accent" id="sim-inject">Injecter / mettre a jour</button>
+        <button class="btn btn-ghost" id="sim-clear-all">Tout retirer</button>
+      </div>
+      <div class="sim-error" id="sim-error"></div>
+    </div>
+
+    <div class="debug-section">
+      <div class="debug-section-title">Trafic simule actif <span class="count" id="sim-count">0</span></div>
+      <div class="sim-list" id="sim-list"></div>
+    </div>
+
+    <div class="debug-section">
+      <div class="debug-section-title">Occupation des postes <span class="count" id="occupancy-count">0</span></div>
+      <div class="grid-table" id="occupancy-table">
+        <div class="grid-row head">
+          <span>Poste</span>
+          <span>Etat</span>
+          <span>Occupe / reserve par</span>
+          <span>Bloque par</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="debug-section" style="border-bottom: none; flex: 1; display: flex; flex-direction: column; min-height: 160px;">
+      <div class="debug-section-title">Logs moteur</div>
+      <div class="debug-body" id="debug-body" style="user-select: text;"></div>
+    </div>
+  </div>
+
   <script src="debug.js"></script>
 </body>
 </html>

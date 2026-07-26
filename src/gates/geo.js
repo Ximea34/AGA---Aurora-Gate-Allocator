@@ -26,6 +26,10 @@ function toRad(deg) {
   return (deg * Math.PI) / 180;
 }
 
+function toDeg(rad) {
+  return (rad * 180) / Math.PI;
+}
+
 /**
  * Distance en metres entre deux points (lat/lon decimaux), formule haversine.
  */
@@ -45,4 +49,28 @@ function distanceNm(lat1, lon1, lat2, lon2) {
   return distanceMeters(lat1, lon1, lat2, lon2) / METERS_PER_NM;
 }
 
-module.exports = { dmsToDecimal, distanceMeters, distanceNm, METERS_PER_NM };
+/**
+ * Point de destination a partir d'une position, un cap (deg, 0=nord) et
+ * une distance (Nm). Utilise par le simulateur de trafic pour placer un
+ * aeronef fictif a X Nm de l'ARP.
+ */
+function destinationPoint(lat, lon, distanceNmValue, bearingDeg) {
+  const d = distanceNmValue * METERS_PER_NM;
+  const brng = toRad(bearingDeg);
+  const lat1 = toRad(lat);
+  const lon1 = toRad(lon);
+
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(d / EARTH_RADIUS_M) + Math.cos(lat1) * Math.sin(d / EARTH_RADIUS_M) * Math.cos(brng)
+  );
+  const lon2 =
+    lon1 +
+    Math.atan2(
+      Math.sin(brng) * Math.sin(d / EARTH_RADIUS_M) * Math.cos(lat1),
+      Math.cos(d / EARTH_RADIUS_M) - Math.sin(lat1) * Math.sin(lat2)
+    );
+
+  return { lat: toDeg(lat2), lon: toDeg(lon2) };
+}
+
+module.exports = { dmsToDecimal, distanceMeters, distanceNm, destinationPoint, METERS_PER_NM };

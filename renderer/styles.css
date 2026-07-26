@@ -505,9 +505,151 @@ input.field.port {
 
 /* ---------- Debug window ---------- */
 
-.debug-body {
+.debug-scroll {
   flex: 1;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.debug-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.debug-section {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+}
+
+.debug-section-title {
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.sim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sim-field input.field,
+.sim-field select.field {
+  width: 100%;
+}
+
+.sim-field.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.sim-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sim-error {
+  color: var(--err);
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.sim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sim-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+
+.sim-list-row .btn {
+  padding: 2px 8px;
+  font-size: 10px;
+}
+
+.grid-table {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.grid-table::-webkit-scrollbar {
+  width: 8px;
+}
+
+.grid-table::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.grid-row {
+  display: grid;
+  grid-template-columns: 64px 90px 1fr 1fr;
+  gap: 8px;
+  padding: 4px 4px;
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+
+.grid-row.head {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+
+.grid-row + .grid-row {
+  border-top: 1px solid var(--border-soft);
+}
+
+.grid-row .state-occupe {
+  color: var(--text);
+}
+
+.grid-row .state-bloque {
+  color: var(--warn);
+}
+
+.grid-row .state-reserve {
+  color: var(--accent);
+}
+
+.debug-body {
   padding: 8px 12px;
   font-family: var(--font-data);
   font-size: 11px;

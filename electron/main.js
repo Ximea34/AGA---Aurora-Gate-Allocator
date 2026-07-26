@@ -75,10 +75,12 @@ engine.on('log', (line) => {
 
 engine.on('status', (status) => {
   if (mainWindow) mainWindow.webContents.send('engine:status', status);
+  if (debugWindow) debugWindow.webContents.send('engine:status', status);
 });
 
 engine.on('update', (snapshot) => {
   if (mainWindow) mainWindow.webContents.send('engine:update', snapshot);
+  if (debugWindow) debugWindow.webContents.send('engine:update', snapshot);
 });
 
 ipcMain.handle('engine:connect', (event, { host, port }) => {
@@ -108,6 +110,26 @@ ipcMain.handle('engine:list-airports', () => {
 ipcMain.handle('engine:set-airport', (event, icao) => {
   engine.setAirport(icao);
   return engine.buildSnapshot();
+});
+
+ipcMain.handle('engine:simulate', (event, params) => {
+  return engine.simulateAircraft(params);
+});
+
+ipcMain.handle('engine:simulate-remove', (event, callsign) => {
+  engine.removeSimulated(callsign);
+});
+
+ipcMain.handle('engine:simulate-clear', () => {
+  engine.clearSimulated();
+});
+
+ipcMain.handle('engine:sim-options', () => {
+  return {
+    aircraftTypes: engine.getAircraftTypes(),
+    airlines: engine.getAirlineCodes(),
+    gateIds: engine.getGateIds(),
+  };
 });
 
 ipcMain.handle('window:action', (event, action) => {

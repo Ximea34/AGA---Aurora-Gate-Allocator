@@ -11,6 +11,11 @@ contextBridge.exposeInMainWorld('aga', {
   listAirports: () => ipcRenderer.invoke('engine:list-airports'),
   setAirport: (icao) => ipcRenderer.invoke('engine:set-airport', icao),
 
+  simulate: (params) => ipcRenderer.invoke('engine:simulate', params),
+  simulateRemove: (callsign) => ipcRenderer.invoke('engine:simulate-remove', callsign),
+  simulateClear: () => ipcRenderer.invoke('engine:simulate-clear'),
+  getSimOptions: () => ipcRenderer.invoke('engine:sim-options'),
+
   onStatus: (callback) => ipcRenderer.on('engine:status', (event, status) => callback(status)),
   onUpdate: (callback) => ipcRenderer.on('engine:update', (event, snapshot) => callback(snapshot)),
 
