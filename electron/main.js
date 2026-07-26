@@ -21,9 +21,13 @@ const MAX_LOG_LINES = 500;
 
 // La config (config/, GATES/) vit dans le dossier utilisateur (APPDATA) une
 // fois l'app packagee, pour rester editable sans droits admin et sans etre
-// ecrasee a chaque mise a jour.
-const userDataDir = bootstrapUserData();
-setDataRoot(userDataDir);
+// ecrasee a chaque mise a jour. En dev (npm start, non packagee), on lit
+// directement le repo pour que les changements soient visibles sans avoir
+// a toucher APPDATA.
+if (app.isPackaged) {
+  const userDataDir = bootstrapUserData();
+  setDataRoot(userDataDir);
+}
 
 const engine = new GateEngine(ICAO);
 
