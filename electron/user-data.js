@@ -17,8 +17,14 @@ const { app } = require('electron');
 function bootstrapUserData() {
   const userDataDir = app.getPath('userData');
 
-  const bundledConfigDir = path.join(__dirname, '..', 'config');
-  const bundledGatesDir = path.join(__dirname, '..', 'GATES');
+  // En dev, config/ et GATES/ sont a la racine du repo (frere de electron/).
+  // Une fois packagee, ils sont livres hors de l'asar via "extraResources"
+  // (electron-builder) car fs.cpSync ne sait pas copier un dossier
+  // present a l'INTERIEUR de app.asar (seules les lectures simples sont
+  // patchees par Electron, pas la copie recursive).
+  const bundledRoot = app.isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+  const bundledConfigDir = path.join(bundledRoot, 'config');
+  const bundledGatesDir = path.join(bundledRoot, 'GATES');
   const userConfigDir = path.join(userDataDir, 'config');
   const userGatesDir = path.join(userDataDir, 'GATES');
 
