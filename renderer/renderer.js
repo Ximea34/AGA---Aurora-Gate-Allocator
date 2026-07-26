@@ -275,12 +275,19 @@ airportSelect.addEventListener('change', () => {
 });
 
 async function initAirportSelect() {
-  const [airports, snapshot] = await Promise.all([window.aga.listAirports(), window.aga.getSnapshot()]);
+  const [airportsResult, snapshot] = await Promise.all([window.aga.listAirports(), window.aga.getSnapshot()]);
   airportSelect.innerHTML = '';
-  for (const airport of airports) {
+  for (const airport of airportsResult.available || []) {
     const option = el('option', null, airport.icao);
     option.value = airport.icao;
     option.title = airport.name;
+    airportSelect.appendChild(option);
+  }
+  for (const bad of airportsResult.incomplete || []) {
+    const option = el('option', null, `${bad.icao} — config incomplete`);
+    option.value = '';
+    option.disabled = true;
+    option.title = bad.reason;
     airportSelect.appendChild(option);
   }
   if (snapshot) airportSelect.value = snapshot.icao;

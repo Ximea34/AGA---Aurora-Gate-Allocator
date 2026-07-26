@@ -121,29 +121,46 @@ function loadAircraftWakeCategories() {
 
 /**
  * Liste les aeroports disponibles : tout fichier config/airports/<icao>.yaml
- * qui a un fichier GATES/<icao>.gts correspondant.
+ * est repere ; ceux qui ont un fichier GATES/<icao>.gts correspondant sont
+ * "available", les autres "incomplete" (avec la raison) pour que
+ * l'utilisateur ait un message explicite plutot qu'une disparition
+ * silencieuse de la liste.
  *
- * Retourne [{ icao, name }, ...].
+ * Retourne { available: [{icao, name}], incomplete: [{icao, name, reason}] }.
  */
 function listAvailableAirports() {
   const airportsDir = path.join(DATA_ROOT, 'config', 'airports');
-  if (!fs.existsSync(airportsDir)) return [];
+  if (!fs.existsSync(airportsDir)) return { available: [], incomplete: [] };
 
-  const airports = [];
+  const available = [];
+  const incomplete = [];
+
   for (const file of fs.readdirSync(airportsDir)) {
     if (!file.endsWith('.yaml')) continue;
     const icaoGuess = path.basename(file, '.yaml');
     const gtsPath = path.join(DATA_ROOT, 'GATES', `${icaoGuess}.gts`);
-    if (!fs.existsSync(gtsPath)) continue;
 
-    const config = yaml.load(fs.readFileSync(path.join(airportsDir, file), 'utf8'));
-    airports.push({
-      icao: config.icao || icaoGuess.toUpperCase(),
-      name: config.name || '',
-    });
+    let config;
+    try {
+      config = yaml.load(fs.readFileSync(path.join(airportsDir, file), 'utf8'));
+    } catch (err) {
+      incomplete.push({ icao: icaoGuess.toUpperCase(), name: '', reason: `config YAML invalide (${err.message})` });
+      continue;
+    }
+
+    const icao = config.icao || icaoGuess.toUpperCase();
+    const name = config.name || '';
+
+    if (!fs.existsSync(gtsPath)) {
+      incomplete.push({ icao, name, reason: `fichier GATES/${icaoGuess}.gts introuvable` });
+      continue;
+    }
+
+    available.push({ icao, name });
   }
 
-  return airports.sort((a, b) => a.icao.localeCompare(b.icao));
+  available.sort((a, b) => a.icao.localeCompare(b.icao));
+  return { available, incomplete };
 }
 
 module.exports = { loadAirport, loadAircraftWakeCategories, listAvailableAirports, setDataRoot, getDataRoot };

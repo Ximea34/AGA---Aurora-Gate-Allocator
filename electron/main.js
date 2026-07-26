@@ -38,6 +38,15 @@ updater.on('state', (state) => {
   if (mainWindow) mainWindow.webContents.send('updater:state', state);
 });
 
+// Signale explicitement toute config aeroport incomplete (yaml present mais
+// .gts manquant, ou yaml invalide) plutot que de la faire disparaitre
+// silencieusement de la liste des terrains disponibles.
+for (const bad of listAvailableAirports().incomplete) {
+  pushLog(
+    `[${new Date().toLocaleTimeString('fr-FR')}] [config] Aeroport ${bad.icao} ignore : ${bad.reason}`
+  );
+}
+
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
