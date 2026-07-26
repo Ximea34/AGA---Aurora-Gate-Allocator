@@ -16,8 +16,9 @@ const { parseLine } = require('./parser');
  *   'flightplan' (parsed)     - reponse #FP
  *   'baylist'  (parsed)       - reponse #BAY / @BAY
  *   'unknown'  (parsed)       - ligne non reconnue
- *   'error'    (err)          - erreur socket
- *   'close'                   - connexion fermee
+ *   'protocolError' (parsed)  - reponse d'erreur du protocole Aurora ($ERR/@ERR)
+ *   'error'    (err)          - erreur socket (vraie instance Error)
+ *   'close'    (hadError)     - connexion fermee, hadError indique une fermeture anormale
  */
 class AuroraConnection extends EventEmitter {
   constructor(host = '127.0.0.1', port = 1130) {
@@ -33,7 +34,7 @@ class AuroraConnection extends EventEmitter {
     this.socket.connect(this.port, this.host, () => this.emit('connect'));
     this.socket.on('data', (data) => this._onData(data));
     this.socket.on('error', (err) => this.emit('error', err));
-    this.socket.on('close', () => this.emit('close'));
+    this.socket.on('close', (hadError) => this.emit('close', hadError));
   }
 
   _onData(data) {
@@ -47,7 +48,14 @@ class AuroraConnection extends EventEmitter {
 
       this.emit('raw', line);
       const parsed = parseLine(line);
-      this.emit(parsed.type, parsed);
+      // Les erreurs de PROTOCOLE ($ERR/@ERR renvoyees par Aurora) ne sont pas
+      // des erreurs socket : ce ne sont pas des instances Error et elles ne
+      // doivent pas etre confondues avec l'evenement 'error' du socket.
+      if (parsed.type === 'error') {
+        this.emit('protocolError', parsed);
+      } else {
+        this.emit(parsed.type, parsed);
+      }
     }
   }
 

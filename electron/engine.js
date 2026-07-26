@@ -32,6 +32,8 @@ class GateEngine extends EventEmitter {
     this.trafficTimer = null;
     this.positionTimer = null;
     this.status = 'disconnected';
+    /** Logue chaque commande envoyee et chaque ligne brute recue (utile pour diagnostiquer le protocole). */
+    this.verbose = true;
   }
 
   log(message) {
@@ -65,7 +67,7 @@ class GateEngine extends EventEmitter {
 
     this.conn.on('connect', () => {
       this.setStatus('connected');
-      this.log(`Connecte - aeroport controle : ${this.airport.icao} (${this.airport.name})`);
+      this.log(`Connecte (socket TCP etabli) - aeroport controle : ${this.airport.icao} (${this.airport.name})`);
       this.conn.sendCommand('#TR');
       this.trafficTimer = setInterval(() => this.conn.sendCommand('#TR'), TRAFFIC_POLL_MS);
       this.positionTimer = setInterval(() => {
@@ -73,6 +75,15 @@ class GateEngine extends EventEmitter {
           this.conn.sendCommand(`#TRPOS;${cs}`);
         }
       }, POSITION_REFRESH_MS);
+    });
+
+    if (this.verbose) {
+      this.conn.on('sent', (cmd) => this.log(`>> ${cmd}`));
+      this.conn.on('raw', (line) => this.log(`<< ${line}`));
+    }
+
+    this.conn.on('protocolError', (parsed) => {
+      this.log(`[protocole] Aurora a repondu une erreur : ${parsed.raw}`);
     });
 
     this.conn.on('traffic', ({ callsigns }) => {
@@ -100,12 +111,12 @@ class GateEngine extends EventEmitter {
 
     this.conn.on('error', (err) => {
       this.setStatus('error');
-      this.log(`[erreur] ${err.message}`);
+      this.log(`[erreur socket] ${err.code || err.name || 'inconnue'} - ${err.message || err}`);
     });
 
-    this.conn.on('close', () => {
+    this.conn.on('close', (hadError) => {
       this.setStatus('disconnected');
-      this.log('Connexion fermee.');
+      this.log(`Connexion fermee${hadError ? ' suite a une erreur socket' : ' (par Aurora ou par nous)'}.`);
       this._stopTimers();
     });
 
