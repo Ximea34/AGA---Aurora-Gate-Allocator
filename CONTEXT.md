@@ -36,7 +36,17 @@ Dépôt GitHub : https://github.com/Ximea34/AGA---Aurora-Gate-Allocator
 - Le 4ᵉ chiffre `Z` vit dans `package.json.build.buildVersion` (métadonnées
   du binaire Windows de l'installeur). Les deux doivent rester
   synchronisés sur les 3 premiers chiffres.
-- Version actuelle : `1.0.2` / `1.0.2.0`.
+- Version actuelle : `1.0.3` / `1.0.3.0`.
+- **Piège découvert (corrigé en 1.0.3)** : `fs.cpSync` ne peut pas copier
+  un dossier situé à l'intérieur de `app.asar` (Electron ne patche que la
+  lecture simple, pas la copie récursive). `config/`/`GATES/` sont donc
+  livrés via `extraResources` (fichiers loose dans `resources/`, hors
+  asar) et exclus du glob `files` de l'asar. `electron/user-data.js` lit
+  depuis `process.resourcesPath` quand `app.isPackaged`, sinon le repo en
+  dev. Ce bug faisait planter TOUTE installation vraiment neuve (ENOENT
+  au premier lancement) — masqué jusque-là uniquement parce que la
+  machine de dev avait déjà un config APPDATA cree par des runs non
+  packages anterieurs.
 - **Piège important** : `electron-updater` ne compare que les 3 premiers
   chiffres (`package.json.version`) pour détecter une mise à jour — le `Z`
   de `buildVersion` seul est invisible pour l'auto-update. Un correctif de
