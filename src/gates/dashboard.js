@@ -26,6 +26,12 @@ function buildDashboard(aircraftList, airport, assignments, wakeCategories) {
   for (const aircraft of aircraftList) {
     if (!aircraft.flightPlan || aircraft.flightPlan.arrivingIcao !== airport.icao) continue;
     if (!aircraft.position) continue;
+    // Le trafic VFR n'a pas besoin d'attribution de porte par le
+    // controleur - masque des 3 colonnes. Reste toutefois compte dans
+    // l'occupation globale (calculee plus haut sur aircraftList complet) :
+    // s'il est physiquement gare a un poste, celui-ci reste bien bloque
+    // pour les suggestions faites aux autres aeronefs.
+    if (aircraft.flightPlan.flightRules === 'V') continue;
 
     const assignedGateId = assignments.get(aircraft.callsign);
     const match = crossCheckGate(aircraft, airport);

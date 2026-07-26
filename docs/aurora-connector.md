@@ -101,8 +101,8 @@ Champs du Flight Plan Record :
 | 4 | Estimated departure time |
 | 5 | Aircraft ICAO |
 | 6 | Wake turbulence |
-| 7 | Flight type |
-| 8 | Flight rules |
+| 7 | Flight rules (I/V/Y/Z) |
+| 8 | Flight type (S/N/G/M/X) |
 | 9 | Equipment |
 | 10 | Cruising altitude |
 | 11 | Cruising speed |
@@ -129,6 +129,12 @@ chacun.
   valide sur `AFR275` (LFPG -> LFLL, A321) : `currentGate = J35`,
   `assignedGate` vide (aucune offre de bay active), coherent avec `#BAY` vide
   au meme instant.
+- Champs 7/8 du Flight Plan Record : la doc les nomme "Flight type" puis
+  "Flight rules" dans cet ordre, mais les valeurs reelles observees (ex.
+  `I;S`) correspondent a l'inverse (`I` = regle de vol IFR, `S` = type de
+  vol Scheduled). Corrige dans `src/parser.js` (champ 7 = `flightRules`,
+  champ 8 = `flightType`) - c'est ce champ 7 qui sert a filtrer le trafic
+  VFR du moteur.
 
 ## Portee des donnees de gate (test agregateur du 2026-07-25)
 

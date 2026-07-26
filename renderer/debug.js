@@ -87,6 +87,7 @@ document.getElementById('sim-inject').addEventListener('click', async () => {
     callsign: document.getElementById('sim-callsign').value,
     aircraftIcao: document.getElementById('sim-aircraft-type').value,
     departureIcao: document.getElementById('sim-departure').value,
+    flightRules: document.getElementById('sim-flight-rules').value,
     distanceNm: document.getElementById('sim-distance').value,
     bearingDeg: document.getElementById('sim-bearing').value,
     altitudeFt: document.getElementById('sim-altitude').value,
