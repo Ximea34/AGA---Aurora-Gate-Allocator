@@ -24,3 +24,8 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Sources de reference brutes (non utilisees par le moteur, gardees en local
+# pour travailler dessus mais jamais poussees/packagees)
+GATES/GATE_WAKE.txt
+GATES/LFLL_compagnies_terminal_porte.txt
