@@ -24,4 +24,11 @@ contextBridge.exposeInMainWorld('aga', {
 
   onDebugLog: (callback) => ipcRenderer.on('debug:log', (event, line) => callback(line)),
   onDebugHistory: (callback) => ipcRenderer.on('debug:history', (event, lines) => callback(lines)),
+
+  getUpdateStatus: () => ipcRenderer.invoke('updater:get-status'),
+  setUpdateChannel: (channel) => ipcRenderer.invoke('updater:set-channel', channel),
+  checkForUpdate: () => ipcRenderer.invoke('updater:check'),
+  downloadUpdate: () => ipcRenderer.invoke('updater:download'),
+  installUpdate: () => ipcRenderer.invoke('updater:install'),
+  onUpdateState: (callback) => ipcRenderer.on('updater:state', (event, state) => callback(state)),
 });

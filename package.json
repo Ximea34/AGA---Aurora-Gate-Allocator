@@ -1,6 +1,6 @@
 {
   "name": "aga-aurora-gate-allocator",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Aurora Gate Allocator - client Third Party pour Aurora (IVAO)",
   "author": "Ximea",
   "main": "electron/main.js",
@@ -8,11 +8,13 @@
     "start": "electron .",
     "cli": "node src/aurora-client.js",
     "aggregator": "node src/run-aggregator.js",
-    "dist": "electron-builder --win portable"
+    "dist": "electron-builder --win nsis",
+    "publish": "electron-builder --win nsis --publish always"
   },
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "js-yaml": "^5.2.2"
   },
   "devDependencies": {
@@ -22,15 +24,27 @@
   "build": {
     "appId": "aero.ivao.aga",
     "productName": "AGA - Aurora Gate Allocator",
-    "buildVersion": "0.1.0.0",
+    "buildVersion": "1.0.0.0",
     "directories": {
       "output": "dist"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Ximea34",
+        "repo": "AGA---Aurora-Gate-Allocator"
+      }
+    ],
     "win": {
-      "target": "portable"
+      "target": "nsis"
     },
-    "portable": {
-      "artifactName": "AGA-Aurora-Gate-Allocator-${version}-portable.exe"
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "AGA-Aurora-Gate-Allocator-Setup-${version}.exe"
     }
   }
 }

@@ -121,6 +121,77 @@ body {
   fill: none;
 }
 
+/* ---------- Mises a jour ---------- */
+
+.update-wrap {
+  position: relative;
+}
+
+.update-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.update-dot.visible {
+  background: var(--accent);
+}
+
+.update-panel {
+  position: absolute;
+  top: 34px;
+  right: 0;
+  width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 20;
+  -webkit-app-region: no-drag;
+}
+
+.update-panel.hidden {
+  display: none;
+}
+
+.update-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.update-row select.field {
+  width: 100px;
+}
+
+.update-status {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: var(--font-data);
+}
+
+.update-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.update-actions .btn {
+  width: 100%;
+}
+
+.update-actions .btn.hidden {
+  display: none;
+}
+
 /* ---------- Toolbar ---------- */
 
 .toolbar {

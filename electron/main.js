@@ -3,6 +3,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const GateEngine = require('./engine');
+const AppUpdater = require('./updater');
 const { bootstrapUserData } = require('./user-data');
 const { listAvailableAirports, setDataRoot } = require('../src/gates/airport-loader');
 
@@ -23,6 +24,17 @@ const userDataDir = bootstrapUserData();
 setDataRoot(userDataDir);
 
 const engine = new GateEngine(ICAO);
+
+function pushLog(line) {
+  logBuffer.push(line);
+  if (logBuffer.length > MAX_LOG_LINES) logBuffer.shift();
+  if (debugWindow) debugWindow.webContents.send('debug:log', line);
+}
+
+const updater = new AppUpdater((message) => pushLog(`[${new Date().toLocaleTimeString('fr-FR')}] ${message}`));
+updater.on('state', (state) => {
+  if (mainWindow) mainWindow.webContents.send('updater:state', state);
+});
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -76,11 +88,7 @@ function createDebugWindow() {
   });
 }
 
-engine.on('log', (line) => {
-  logBuffer.push(line);
-  if (logBuffer.length > MAX_LOG_LINES) logBuffer.shift();
-  if (debugWindow) debugWindow.webContents.send('debug:log', line);
-});
+engine.on('log', (line) => pushLog(line));
 
 engine.on('status', (status) => {
   if (mainWindow) mainWindow.webContents.send('engine:status', status);
@@ -153,6 +161,22 @@ ipcMain.handle('window:action', (event, action) => {
 ipcMain.handle('window:open-debug', () => {
   createDebugWindow();
 });
+
+ipcMain.handle('updater:get-status', () => ({
+  channel: updater.getChannel(),
+  version: app.getVersion(),
+  isPackaged: app.isPackaged,
+}));
+
+ipcMain.handle('updater:set-channel', (event, channel) => {
+  updater.setChannel(channel);
+});
+
+ipcMain.handle('updater:check', () => updater.check());
+
+ipcMain.handle('updater:download', () => updater.download());
+
+ipcMain.handle('updater:install', () => updater.install());
 
 app.whenReady().then(() => {
   createMainWindow();

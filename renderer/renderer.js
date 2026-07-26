@@ -287,11 +287,71 @@ async function initAirportSelect() {
   if (snapshot) airportSelect.value = snapshot.icao;
 }
 
+// ---------- Mises a jour ----------
+
+const UPDATE_STATE_TEXT = {
+  idle: 'Pret',
+  checking: 'Recherche...',
+  available: (s) => `Disponible : v${s.version}`,
+  'not-available': 'A jour',
+  downloading: (s) => `Telechargement... ${s.percent}%`,
+  downloaded: (s) => `Pret a installer (v${s.version})`,
+  error: (s) => `Erreur : ${s.error}`,
+};
+
+function renderUpdateState(state) {
+  const text = UPDATE_STATE_TEXT[state.state];
+  document.getElementById('update-status').textContent = typeof text === 'function' ? text(state) : text || state.state;
+  document.getElementById('update-download').classList.toggle('hidden', state.state !== 'available');
+  document.getElementById('update-install').classList.toggle('hidden', state.state !== 'downloaded');
+  document.getElementById('update-dot').classList.toggle('visible', state.state === 'available' || state.state === 'downloaded');
+}
+
+const updatePanel = document.getElementById('update-panel');
+document.getElementById('btn-update').addEventListener('click', (e) => {
+  e.stopPropagation();
+  updatePanel.classList.toggle('hidden');
+});
+document.addEventListener('click', (e) => {
+  if (!updatePanel.classList.contains('hidden') && !e.target.closest('.update-wrap')) {
+    updatePanel.classList.add('hidden');
+  }
+});
+
+document.getElementById('update-channel').addEventListener('change', (e) => {
+  window.aga.setUpdateChannel(e.target.value);
+});
+
+document.getElementById('update-check').addEventListener('click', async () => {
+  try {
+    await window.aga.checkForUpdate();
+  } catch (err) {
+    document.getElementById('update-status').textContent = `Erreur : ${err.message}`;
+  }
+});
+document.getElementById('update-download').addEventListener('click', async () => {
+  try {
+    await window.aga.downloadUpdate();
+  } catch (err) {
+    document.getElementById('update-status').textContent = `Erreur : ${err.message}`;
+  }
+});
+document.getElementById('update-install').addEventListener('click', () => window.aga.installUpdate());
+
+window.aga.onUpdateState(renderUpdateState);
+
+async function initUpdatePanel() {
+  const status = await window.aga.getUpdateStatus();
+  document.getElementById('update-version').textContent = status.version;
+  document.getElementById('update-channel').value = status.channel;
+}
+
 window.aga.onStatus(setStatus);
 window.aga.onUpdate(render);
 
 setStatus('disconnected');
 initAirportSelect();
+initUpdatePanel();
 window.aga.getSnapshot().then((snapshot) => {
   if (snapshot) render(snapshot);
 });

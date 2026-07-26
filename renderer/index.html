@@ -12,6 +12,31 @@
       <span class="icao" id="titlebar-icao">LFLL</span>
     </div>
     <div class="titlebar-controls">
+      <div class="update-wrap">
+        <button class="win-btn" id="btn-update" title="Mises a jour">
+          <svg viewBox="0 0 16 16"><path d="M8 2v8M4.5 6.5L8 10l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13h10" stroke-linecap="round"/></svg>
+          <span class="update-dot" id="update-dot"></span>
+        </button>
+        <div class="update-panel hidden" id="update-panel">
+          <div class="update-row">
+            <span class="field-label">Version</span>
+            <span class="data" id="update-version">-</span>
+          </div>
+          <div class="update-row">
+            <span class="field-label">Canal</span>
+            <select class="field code" id="update-channel">
+              <option value="latest">Stable</option>
+              <option value="beta">Beta</option>
+            </select>
+          </div>
+          <div class="update-status" id="update-status">-</div>
+          <div class="update-actions">
+            <button class="btn btn-ghost" id="update-check">Verifier</button>
+            <button class="btn btn-accent hidden" id="update-download">Telecharger</button>
+            <button class="btn btn-accent hidden" id="update-install">Redemarrer et installer</button>
+          </div>
+        </div>
+      </div>
       <button class="win-btn" id="btn-debug" title="Fenetre debug">
         <svg viewBox="0 0 16 16"><path d="M2 3h12M2 8h12M2 13h8" stroke-linecap="round"/></svg>
       </button>
