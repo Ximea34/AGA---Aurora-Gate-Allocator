@@ -1,0 +1,54 @@
+name: Release
+
+# Declenche sur un tag "v1.0.0" (canal Stable) ou "v1.1.0-beta.1" (canal Beta,
+# publie comme prerelease). package.json "version" doit correspondre au tag
+# (sans le prefixe v) avant de taguer :
+#
+#   1. Mettre a jour "version" et "build.buildVersion" dans package.json
+#   2. git add package.json && git commit -m "Bump version to X.Y.Z"
+#   3. git tag vX.Y.Z            (ou vX.Y.Z-beta.N depuis la branche BETA)
+#   4. git push origin <branche> vX.Y.Z
+#
+# electron-updater (cote client) lit latest.yml pour le canal Stable et
+# beta.yml pour le canal Beta - les deux sont generes et publies
+# automatiquement par electron-builder ci-dessous.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Determine update channel from tag
+        id: channel
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_name }}" == *-beta* ]]; then
+            echo "name=beta" >> "$GITHUB_OUTPUT"
+            echo "releaseType=prerelease" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=latest" >> "$GITHUB_OUTPUT"
+            echo "releaseType=release" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and publish to GitHub Releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          npx electron-builder --win nsis --publish always
+          -c.publish.channel=${{ steps.channel.outputs.name }}
+          -c.publish.releaseType=${{ steps.channel.outputs.releaseType }}

@@ -18,10 +18,14 @@ Dépôt GitHub : https://github.com/Ximea34/AGA---Aurora-Gate-Allocator
 ## Workflow Git du projet
 
 - `DEV` : développement actif (branche courante).
-- `BETA` : à créer quand une première version fonctionnelle est prête.
-- `MAIN` : version stable, à créer une fois validée.
+- `BETA` : releases beta, publiées sur le canal de mise à jour Beta.
+- `MAIN` : version stable, publiée sur le canal de mise à jour Stable.
 - Pas de push automatique vers `MAIN`/`BETA` sans validation explicite de
   l'utilisateur.
+- Publier une version = tagger `vX.Y.Z` (stable, depuis `MAIN`) ou
+  `vX.Y.Z-beta.N` (beta, depuis `BETA`) et pousser le tag — le workflow
+  `.github/workflows/release.yml` build et publie automatiquement la
+  Release GitHub (voir section Build & distribution).
 
 ## Versioning : `C.X.W.Z`
 
@@ -30,9 +34,10 @@ Dépôt GitHub : https://github.com/Ximea34/AGA---Aurora-Gate-Allocator
 - `package.json.version` reste en semver 3 chiffres (`C.X.W`, requis par
   npm/electron-builder).
 - Le 4ᵉ chiffre `Z` vit dans `package.json.build.buildVersion` (métadonnées
-  du binaire Windows du `.exe` portable). Les deux doivent rester
+  du binaire Windows de l'installeur). Les deux doivent rester
   synchronisés sur les 3 premiers chiffres.
-- Version actuelle : `0.1.0` / `0.1.0.0`.
+- Version actuelle : `1.0.0` / `1.0.0.0` (première version MAIN, pas encore
+  mergée/taguée au moment de la rédaction de cette section).
 
 ## Le connecteur Aurora Third Party
 
@@ -165,8 +170,21 @@ Electron — réutilisés tels quels par `electron/engine.js`.
   `ipcMain.handle`.
 - `electron/preload.js` — `contextBridge` expose `window.aga.*` (connect,
   disconnect, assign, clear, getSnapshot, onStatus, onUpdate, windowAction,
-  openDebugWindow, onDebugLog/History). Aucun accès Node direct côté
-  renderer.
+  openDebugWindow, onDebugLog/History, listAirports/setAirport,
+  simulate/simulateRemove/simulateClear/getSimOptions,
+  getUpdateStatus/setUpdateChannel/checkForUpdate/downloadUpdate/
+  installUpdate/onUpdateState). Aucun accès Node direct côté renderer.
+- `electron/user-data.js` — copie `config/`/`GATES/` vers APPDATA au
+  premier lancement (voir section Build & distribution).
+- `electron/settings.js` — persiste `{ updateChannel }` dans
+  `APPDATA/settings.json`.
+- `electron/updater.js` — `AppUpdater` (EventEmitter), enveloppe
+  `electron-updater`, émet `'state'` (idle/checking/available/downloading/
+  downloaded/error).
+- Fenêtre debug (`renderer/debug.html`/`debug.js`) : en plus des logs bruts,
+  contient le **simulateur de trafic** (injecte des aéronefs fictifs via
+  `GateEngine.simulateAircraft()` — distance/cap/altitude/vitesse OU poste
+  physique exact) et un tableau d'occupation des postes en direct.
 - `renderer/index.html` + `renderer.js` — UI principale :
   - Titlebar custom (drag zone + boutons debug/pin/minimize/maximize/close
     en SVG trait fin).
@@ -211,15 +229,48 @@ Outil pro dense façon ATC/ops, dark uniquement :
 - `user-select: none` par défaut, `text` explicite sur les données
   copiables (callsigns, logs debug).
 
-## Build & distribution
+## Build, distribution & mises à jour
 
-- `npm start` — lance l'UI Electron.
+- `npm start` — lance l'UI Electron (mode dev : lit `config/`/`GATES/` du repo).
 - `npm run cli` — client TCP manuel (debug protocole).
 - `npm run aggregator` — agrégateur console sans UI (avec commandes
   `assign CALLSIGN GATE` / `clear CALLSIGN` au clavier).
-- `npm run dist` — build `electron-builder` → portable Windows
-  `.exe` dans `dist/` (gitignored, trop gros pour le repo). Config dans
-  `package.json.build` (target `portable`, `appId: aero.ivao.aga`).
+- `npm run dist` — build `electron-builder` → **installeur NSIS** Windows
+  (`dist/AGA-Aurora-Gate-Allocator-Setup-<version>.exe`, gitignored). Install
+  par utilisateur (pas d'admin requis). Génère aussi `latest.yml`
+  (ou `beta.yml` selon le canal) nécessaire à `electron-updater`.
+- `npm run publish` — comme `dist` + upload vers les Releases GitHub
+  (nécessite `GH_TOKEN`, utilisé automatiquement par le workflow CI).
+
+**Config externalisée (`electron/user-data.js`)** : au premier lancement de
+l'app packagée, `config/` et `GATES/` sont copiés vers
+`app.getPath('userData')` (`%APPDATA%\AGA - Aurora Gate Allocator\` sous
+Windows) si absents, puis `airport-loader.js` lit/écrit depuis ce dossier
+via `setDataRoot()`. Les CLI de dev n'appellent jamais `setDataRoot()` donc
+continuent de lire le repo. Ça permet à l'utilisateur d'éditer sa config
+sans droits admin et sans qu'une mise à jour l'écrase.
+
+**Mises à jour automatiques (`electron/updater.js` + `settings.js`)** :
+`electron-updater` pointé sur les Releases GitHub du repo
+(`aero.ivao.aga` / owner `Ximea34`, repo `AGA---Aurora-Gate-Allocator`).
+Deux canaux persistés dans `%APPDATA%\...\settings.json` :
+- `latest` (Stable) → Releases publiées depuis `MAIN`.
+- `beta` (Beta) → Releases (prerelease) publiées depuis `BETA`.
+
+Téléchargement/installation **manuels** (pas d'auto-download silencieux) :
+panneau dans la titlebar (bouton avec pastille accent si MAJ dispo) →
+Vérifier / Télécharger / Redémarrer et installer. Désactivé hors app
+packagée (`app.isPackaged` false en `npm start`).
+
+**Publication d'une version** : bump `version`/`build.buildVersion` dans
+`package.json`, commit, puis `git tag vX.Y.Z` (stable, depuis `MAIN`) ou
+`vX.Y.Z-beta.N` (beta, depuis `BETA`), `git push origin <branche> <tag>`.
+Le workflow [.github/workflows/release.yml](.github/workflows/release.yml)
+(déclenché sur push de tag `v*.*.*`) build et publie automatiquement la
+Release GitHub, canal déduit de la présence de `-beta` dans le tag.
+Testé localement (`npm run dist`) : génère bien l'installeur + `latest.yml`
+avec hash/taille corrects — la partie GitHub Actions elle-même n'a pas
+encore été déclenchée en réel (pas de tag poussé à ce stade).
 
 ## Points ouverts / à reprendre
 
@@ -240,10 +291,22 @@ Outil pro dense façon ATC/ops, dark uniquement :
 6. **Pas de tests automatisés** (unit tests) — toute la validation faite
    jusqu'ici est manuelle (scripts `node -e` ponctuels + tests en live
    contre une session Aurora réelle). À considérer si le projet grossit.
-7. **BETA/MAIN** pas encore créées sur GitHub — seule `DEV` existe côté
-   remote.
-8. **Un seul aéroport géré** (LFLL) : l'architecture est générique
-   (`loadAirport(icao)` prend n'importe quel ICAO ayant un `.gts` +
-   `config/airports/<icao>.yaml`), mais aucun autre aéroport n'a de config.
-   Le sélecteur d'aéroport n'existe pas encore côté UI (ICAO fixé en dur à
-   `LFLL` dans `electron/main.js`, override possible via `AGA_ICAO` env var).
+7. **BETA/MAIN pas encore créées sur GitHub** — seule `DEV` existe côté
+   remote au moment de la rédaction. La sortie de la première version MAIN
+   (merge + tag `v1.0.0` + premier run réel du workflow de release) reste à
+   faire.
+8. **Pas de signature de code** : l'installeur n'est pas signé, Windows
+   SmartScreen affichera un avertissement "éditeur inconnu" à
+   l'installation (accepté comme compromis pour l'instant, cf. décision
+   utilisateur).
+9. **Bug de déconnexion Aurora non reproduit** : un cas de "connecte puis
+   fermeture immédiate" a été observé une fois (voir historique de
+   conversation), corrigé partiellement (confusion `$ERR` protocole vs
+   erreur socket réelle, cause du `[erreur] undefined`) et instrumenté avec
+   des logs bruts verbeux (`GateEngine.verbose = true`), mais la cause de la
+   fermeture immédiate elle-même n'a pas été identifiée avec certitude (non
+   reproduite en isolation hors Electron). À surveiller.
+10. **Un seul aéroport configuré** (LFLL), mais le sélecteur de terrain
+    existe déjà côté UI (toolbar) et liste automatiquement tout aéroport
+    ayant un `config/airports/<icao>.yaml` + `GATES/<icao>.gts` — ajouter un
+    aéroport ne nécessite aucun changement de code.
