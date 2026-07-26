@@ -71,13 +71,6 @@ body {
   gap: 8px;
 }
 
-.titlebar-title .icao {
-  color: var(--accent);
-  font-family: var(--font-data);
-  letter-spacing: normal;
-  text-transform: none;
-}
-
 .titlebar-controls {
   display: flex;
   align-items: center;

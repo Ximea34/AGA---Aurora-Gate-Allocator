@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#34d3c8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#34d3c8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14171b"/>
+      <stop offset="100%" stop-color="#0d0f12"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background badge -->
+  <rect x="8" y="8" width="496" height="496" rx="96" fill="url(#bg)"/>
+  <rect x="8" y="8" width="496" height="496" rx="96" fill="url(#glow)"/>
+  <rect x="8" y="8" width="496" height="496" rx="96" fill="none" stroke="#34d3c8" stroke-opacity="0.25" stroke-width="2"/>
+
+  <!-- Door frame (classic doorway, top-arched) -->
+  <path d="M156 400
+           L156 210
+           Q156 128 256 128
+           Q356 128 356 210
+           L356 400
+           Z"
+        fill="none" stroke="#34d3c8" stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- Door panel (filled, sits inside frame) -->
+  <path d="M172 400
+           L172 212
+           Q172 144 256 144
+           Q340 144 340 212
+           L340 400
+           Z"
+        fill="#0d0f12" stroke="#34d3c8" stroke-width="4" stroke-opacity="0.5"/>
+
+  <!-- Classic door panel lines (two raised rectangle panels) -->
+  <rect x="196" y="180" width="120" height="90" rx="10" fill="none" stroke="#34d3c8" stroke-width="4" stroke-opacity="0.4"/>
+  <rect x="196" y="288" width="120" height="96" rx="10" fill="none" stroke="#34d3c8" stroke-width="4" stroke-opacity="0.4"/>
+
+  <!-- Door handle -->
+  <circle cx="322" cy="300" r="9" fill="#34d3c8"/>
+
+  <!-- Door threshold line -->
+  <line x1="150" y1="400" x2="362" y2="400" stroke="#34d3c8" stroke-width="12" stroke-linecap="round"/>
+</svg>

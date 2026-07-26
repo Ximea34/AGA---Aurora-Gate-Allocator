@@ -243,7 +243,6 @@ let latestSnapshot = null;
 
 function render(snapshot) {
   latestSnapshot = snapshot;
-  document.getElementById('titlebar-icao').textContent = snapshot.icao;
 
   renderColumn('col-pending', 'count-pending', snapshot.pending, buildPendingRow, 'Aucun trafic en approche');
   renderColumn('col-taxi', 'count-taxi', snapshot.taxiAssigned, buildTaxiRow, 'Aucun trafic au roulage');

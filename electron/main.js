@@ -9,6 +9,8 @@ const { listAvailableAirports, setDataRoot } = require('../src/gates/airport-loa
 
 app.setName('AGA - Aurora Gate Allocator');
 
+const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.png');
+
 const DEFAULT_ICAO = 'LFLL';
 const ICAO = process.env.AGA_ICAO || DEFAULT_ICAO;
 
@@ -44,6 +46,7 @@ function createMainWindow() {
     minHeight: 600,
     frame: false,
     backgroundColor: '#0d0f12',
+    icon: ICON_PATH,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -70,6 +73,7 @@ function createDebugWindow() {
     height: 480,
     frame: false,
     backgroundColor: '#0d0f12',
+    icon: ICON_PATH,
     parent: mainWindow || undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
