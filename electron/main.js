@@ -69,6 +69,19 @@ function createMainWindow() {
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 
+  // Bug observe (video utilisateur) : cliquer une puce de porte dans AGA
+  // juste apres avoir interagi avec Aurora peut faire minimiser la fenetre
+  // AGA sous Windows, meme en mode toujours-au-premier-plan (epingle) -
+  // vraisemblablement Aurora qui reprend le focus/premier plan de facon
+  // agressive et Windows tranche en minimisant l'autre fenetre topmost.
+  // Une fenetre epinglee ne devrait jamais rester minimisee : on la
+  // restaure immediatement si ca arrive.
+  mainWindow.on('minimize', () => {
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      mainWindow.restore();
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (debugWindow) debugWindow.close();
