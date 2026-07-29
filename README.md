@@ -77,7 +77,7 @@ Le champ `version` de `package.json` reste en semver 3 chiffres (`C.X.W`,
 requis par npm/electron-builder) ; le 4ᵉ segment `Z` vit dans
 `build.buildVersion` (utilisé pour la version du binaire Windows de
 l'installeur). Les deux sont à garder synchronisés sur les 3 premiers
-chiffres. Version actuelle : `1.1.0` / `1.1.0.0`.
+chiffres. Version actuelle : `1.1.1` / `1.1.1.0`.
 
 Note pratique : `electron-updater` compare uniquement les 3 premiers
 chiffres (`C.X.W`, ceux de `package.json.version`) pour detecter une

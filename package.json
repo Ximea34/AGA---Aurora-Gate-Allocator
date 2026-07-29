@@ -1,6 +1,6 @@
 {
   "name": "aga-aurora-gate-allocator",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Aurora Gate Allocator - client Third Party pour Aurora (IVAO)",
   "author": "Ximea",
   "main": "electron/main.js",
@@ -24,7 +24,7 @@
   "build": {
     "appId": "aero.ivao.aga",
     "productName": "AGA - Aurora Gate Allocator",
-    "buildVersion": "1.1.0.0",
+    "buildVersion": "1.1.1.0",
     "directories": {
       "output": "dist"
     },
