@@ -60,6 +60,48 @@ You'll typically have one or both of:
   often gatekept behind an internal ops extranet (as found for LFPO). Don't
   assume it's there; search for it, and note plainly in the yaml if it
   isn't.
+- **A dedicated airline-assignment spreadsheet/PDF**, sometimes maintained
+  separately per airport when the MANEX itself just says "see the
+  affectation table" (this happened for LFPG — the MANEX pointed at
+  `LFPG-Affectation compagnies.pdf`). If the MANEX references a filename
+  you don't have, ask for it before improvising airline groupings from
+  vaguer MANEX prose — a precise table beats inference every time.
+
+**If `pdftotext -layout` produces garbled or scrambled output** (columns
+splitting across lines, values detached from their row, especially past
+page 1 of a multi-page table) — don't trust it and don't try to
+reverse-engineer which stray value belongs to which row. This happens with
+complex tables and with vector-drawn charts whose text isn't reliably
+extractable at all (a real eAIP APDC parking chart can have zero
+extractable text even though `pdftotext` succeeds on the surrounding pages).
+Render the page as an image instead and read it visually:
+```bash
+python -c "
+import pypdfium2 as pdfium
+pdf = pdfium.PdfDocument(r'<path-to-pdf>')
+page = pdf[<zero-indexed-page-number>]
+bitmap = page.render(scale=3.0)  # bump to 4-4.5 for dense charts/small labels
+bitmap.to_pil().save(r'<scratchpad>/page.png')
+"
+```
+(`pip install pypdfium2 pillow` first if not already available — no system
+poppler/pdftoppm needed, unlike some other PDF-to-image routes.) For a
+big PDF where you don't know which page has the chart you need, render
+several candidate pages at low scale (~0.4-0.6) into one grid image first
+(tile them with Pillow) so you can spot the right one before spending
+tokens on a full-resolution read; then re-render just that page at high
+scale, tiling it into quadrants if it's dense (parking charts are — a
+whole-page read at normal resolution loses individual stand labels).
+
+**Finding the actual chart page in a large eAIP** when text search for the
+chart's own name (e.g. "APDC 01") only turns up *references to* the chart
+rather than the chart itself (common — the chart's title may be vector
+text pdftotext can't extract, even though pages that merely cite it in
+prose extract fine): search instead for a distinctive stand ID the source
+prose already mentioned (e.g. a named A380 stand) across all pages via
+`pypdfium2`, or compare extracted-text length per page — chart pages tend
+to have anomalously short or garbled text relative to the prose sections
+around them.
 
 If given a large PDF (100+ pages), **don't render every page as an image** —
 extract text instead, which is dramatically faster and was already validated
@@ -102,6 +144,24 @@ examples if anything here is ambiguous).
    comment, the way lfpo.yaml does. A stand with no evidence either way can
    be left out of `wake_categories` entirely (the engine treats a missing
    entry as "no category data", not as unlimited).
+
+   **Check whether `GATES/<icao>.gts` itself already has this data first**,
+   before going elsewhere. The `.gts` format documented in
+   `references/schema.md` is just coordinates, but some real files the user
+   supplies carry a 5th `;`-delimited field per line that turns out to
+   *be* the wake category, using single-letter codes that aren't
+   self-explanatory in isolation (LFPO used `H/M/S/L`; LFPG used `G/M/H/S`
+   — same idea, different letters, and critically **not the same meaning
+   in each file**: for LFPG, `S` = Super/A380, confirmed by cross-checking
+   against A380 stands the MANEX named explicitly; guessing `H` = Heavy
+   without that cross-check would have been wrong, since `S` — not `H` —
+   turned out to be the top category both times). If a 5th field exists,
+   don't assume what it means from the letters alone — find at least one
+   stand the source prose independently identifies (a named A380/heavy
+   stand is ideal, since it's usually called out explicitly) and check
+   what value it has in the file. If the letters don't resolve confidently
+   this way, treat the field as unknown rather than guess, exactly as with
+   any other ambiguous source.
 5. **`gate_groups`** — zone/terminal → stand list → airline list. Cross-check
    every stand ID against the `.gts` file (step 0). Translate airline names
    to ICAO callsign-prefix codes (e.g. "Air France" → `AFR`) using
@@ -128,6 +188,19 @@ Always include:
 - A `LIMITES CONNUES` comment section listing every approximation, omission,
   or uncertainty from step 2 — this is not optional politeness, it's what
   lets the user (or you, next session) know what to trust versus verify.
+
+For a small airport (LFLL/LFPO scale, ~100-150 stands) hand-writing the
+yaml directly is fine. For a large hub (LFPG scale, 500 stands across
+dozens of prefix groups), hand-typing invites transcription errors and
+burns a lot of turns — write a short one-off Node script instead that
+reads `GATES/<icao>.gts`, applies your prefix→group and 5th-field→category
+rules programmatically, and emits the yaml text. Keep the rules (which
+regex/prefix maps to which zone, the airline lists per zone) as plain data
+in the script so they're easy to review, and print a summary (counts of
+grouped/ungrouped/closed stands, a few sample lookups) before writing the
+file — that summary is often how you'll notice a rule matched too much or
+too little. This script is disposable scratch tooling, not something to
+commit to the repo.
 
 ## Step 4 — Validate
 

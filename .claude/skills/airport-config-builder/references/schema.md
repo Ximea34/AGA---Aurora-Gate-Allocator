@@ -116,9 +116,15 @@ because it looks geometrically adjacent.
 
 ## Full worked examples
 
-Read these two files directly for complete, real, working configs:
+Read these files directly for complete, real, working configs:
 - `config/airports/lfll.yaml` — precise wake data + confirmed directional
   blocking table.
 - `config/airports/lfpo.yaml` — qualitative wake approximation + merged
   overlapping zone groups (see its "LIMITES CONNUES" header comment for how
   to write up an ambiguous source honestly).
+- `config/airports/lfpg.yaml` — large-hub scale (500+ stands, generated via
+  a one-off script rather than hand-written): a `.gts` 5th field decoded as
+  the real wake category by cross-checking named A380 stands, prefix→zone
+  mapping read visually off eAIP parking charts (pdftotext failed on them),
+  and an honest gap left open for one zone (Terminal 3) whose physical
+  stand prefix couldn't be confirmed.
