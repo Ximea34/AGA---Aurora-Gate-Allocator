@@ -1,0 +1,915 @@
+# Configuration moteur d'allocation - Paris Charles de Gaulle (LFPG)
+#
+# Sources :
+#   - GATES/lfpg.gts (coordonnees + 5e champ G/M/H/S = categorie de voilure,
+#     fourni par l'utilisateur)
+#   - AIP France AD 2 LFPG (eAIP, AMDT en vigueur a la generation) : ARP
+#     (AD 2 LFPG.2), cartes AD 2 LFPG APDC 01-05 (postes de stationnement,
+#     lues visuellement pour etablir la correspondance prefixe de poste <->
+#     zone du tableau compagnies)
+#   - LFPG-Affectation compagnies.pdf (document IVAO France specifique a LFPG,
+#     mise a jour 30/06/2025) : tableau exhaustif compagnie -> zone(s)
+#   - MANEX Aeroports Civils IVAO LFPG (wiki.ivao.fr) : description generale
+#     des terminaux, postes A380, zone Juliett/Kilo/Lima non commerciale
+#
+# LIMITES CONNUES (a completer/verifier) :
+#   - Categorie de voilure : le 5e champ du .gts (G/M/H/S) a ete interprete
+#     comme G=Light(B), M=Medium(C), H=Heavy(E), S=Super/A380(F), confirme
+#     par recoupement avec les postes A380 explicitement cites par le MANEX
+#     (CFE, CFW, K05, K13, K53, K59, K65, K71 -> tous "S"). Plus fiable que
+#     l'approximation qualitative utilisee pour LFPO, mais reste une
+#     interpretation non confirmee par ADP/le SIA directement.
+#   - Zone "3" (Terminal 3, bus-gate) : AUCUN prefixe de poste physique
+#     identifie avec certitude - les compagnies qui y sont affectees dans le
+#     tableau (AIZ/Arkia, ENT, EXS, FEG, FPO pax, IBS, ISR, LBT, MAC, MSC,
+#     NBT, NIA, PGT, SXS, TSC, TVS, UAL, VLG, VOE) ne sont PAS assignees a un
+#     groupe ici. A completer si la carte APDC correspondante est identifiee.
+#   - Zone "FedEx" du tableau compagnies supposee correspondre a l'aire
+#     "India" (prefixe I numerique simple, hors I3*/I4* qui sont les
+#     satellites 2ES3/2ES4 confirmes visuellement) - deduction par
+#     l'alphabet phonetique (India=I), pas confirmee par une carte.
+#   - Zones "R" et "S" (colonnes distinctes du tableau compagnies, hors
+#     Satellite S3/S4) mappees aux prefixes R*/S* par simple correspondance
+#     de lettre - non confirme visuellement sur une carte APDC.
+#   - Postes Juliett/Kilo/Lima (J*/K*/L*) fermes (stockage/overflow non
+#     commercial d'apres le MANEX) - cela inclut aussi les vrais postes A380
+#     K05/K13/K53/K59/K65/K71 : ils ne seront donc jamais suggeres tant que
+#     cette zone reste fermee. A revoir si ces postes gros-porteurs doivent
+#     etre ouverts.
+#   - ~130 postes (prefixes EN*, Q*, T*, U*hors-UW, etc.) sans
+#     groupe de compagnie identifie - ouverts a toute compagnie, filtres par
+#     categorie de voilure uniquement.
+#   - Aucune donnee de blocage de voisinage (gate_blocking) trouvee pour
+#     LFPG - omis.
+
+icao: LFPG
+name: Paris Charles de Gaulle
+
+reference_point:
+  lat: N049.00.35.000
+  lon: E002.32.52.000
+
+final_approach_criteria:
+  radius_nm: 3
+  max_altitude_ft: 2000
+
+# Postes Juliett/Kilo/Lima : stockage/overflow non commercial (MANEX §Cargo
+# et zones de stockage). Inclut aussi les vrais postes A380 K05/K13/K53/
+# K59/K65/K71/CFE/CFW - voir LIMITES CONNUES ci-dessus.
+closed_gates:
+  - J01
+  - J02
+  - J03
+  - J04
+  - J05
+  - J06
+  - J10
+  - J11
+  - J12
+  - J13
+  - J14
+  - J16
+  - J18
+  - J20
+  - J21
+  - J30
+  - J31
+  - J33
+  - J34
+  - J37
+  - J38
+  - J39
+  - J40
+  - J41
+  - J51
+  - J53
+  - J55
+  - J57
+  - K01
+  - K05
+  - K09
+  - K13
+  - K17
+  - K21
+  - K26
+  - K32
+  - K38
+  - K44
+  - K52
+  - K53
+  - K58
+  - K59
+  - K64
+  - K65
+  - K70
+  - K71
+  - K76
+  - L27
+  - L33
+  - L39
+  - L53
+  - L59
+  - L65
+  - L71
+
+wake_categories:
+  A01: E
+  A03: E
+  A04: E
+  A05: E
+  A06: C
+  A07: E
+  A08: E
+  A09: E
+  A10: E
+  A12: C
+  A14: E
+  A16: C
+  A18: E
+  A30: E
+  A32: C
+  A34: E
+  A38: E
+  A39: E
+  B01: C
+  B02: C
+  B03: C
+  B04: E
+  B05: C
+  B06: C
+  B07: C
+  B08: C
+  B09: C
+  B10: E
+  B11: C
+  B12: C
+  B13: E
+  B14: E
+  B15: C
+  B16: C
+  B18: E
+  B20: C
+  B22: C
+  B24: E
+  B26: C
+  C02: E
+  C03: C
+  C04: E
+  C05: E
+  C06: C
+  C07: E
+  C08: E
+  C10: C
+  C12: E
+  C14: E
+  C4A: C
+  CF9: F
+  CFE: F
+  CFW: F
+  D02: C
+  D03: C
+  D05: C
+  D06: C
+  D07: E
+  D08: C
+  D09: C
+  D10: E
+  D11: C
+  D12: C
+  D13: E
+  D14: C
+  D15: C
+  D16: C
+  D17: C
+  D18: C
+  D19: C
+  D20: C
+  D22: E
+  D24: C
+  E01: C
+  E05: C
+  E08: C
+  E09: C
+  E14: E
+  E15: C
+  E16: C
+  E17: C
+  E18: E
+  E20: E
+  E21: C
+  E22: E
+  E24: E
+  E25: C
+  E26: E
+  E27: E
+  E29: C
+  E30: E
+  E32: E
+  E34: C
+  E38: E
+  E40: C
+  E42: C
+  F02: C
+  F03: E
+  F04: C
+  F08: C
+  F09: E
+  F10: C
+  F14: C
+  F15: E
+  F16: C
+  F20: C
+  F22: C
+  F26: C
+  F28: E
+  F30: C
+  F32: C
+  F34: C
+  F66: C
+  F68: C
+  F70: C
+  F72: E
+  F74: E
+  F76: C
+  F80: C
+  F82: C
+  F84: C
+  F86: C
+  F90: C
+  F92: C
+  F94: C
+  F96: C
+  G10: B
+  G11: B
+  G12: B
+  G13: B
+  G14: B
+  G20: B
+  G21: B
+  G22: B
+  G23: B
+  G24: C
+  G31: C
+  G35: C
+  H01: E
+  H02: E
+  H03: E
+  H04: E
+  H05: E
+  H06: E
+  H07: E
+  H08: E
+  H09: E
+  H10: E
+  H11: E
+  H12: E
+  H20: C
+  H21: C
+  H22: C
+  H23: F
+  H30: C
+  H34: C
+  H40: C
+  H50: C
+  H55: F
+  H60: C
+  H65: C
+  H70: C
+  H80: C
+  H87: C
+  J01: C
+  J02: C
+  J03: C
+  J04: C
+  J05: C
+  J06: C
+  J10: C
+  J11: C
+  J12: C
+  J13: C
+  J14: C
+  J16: C
+  J18: C
+  J20: C
+  J21: C
+  J30: C
+  J31: C
+  J33: C
+  J34: C
+  J37: C
+  J38: C
+  J39: C
+  J40: C
+  J41: C
+  J51: E
+  J53: E
+  J55: E
+  J57: E
+  K01: E
+  K05: F
+  K09: E
+  K13: F
+  K17: E
+  K21: E
+  K26: E
+  K32: E
+  K38: E
+  K44: E
+  K52: E
+  K53: F
+  K58: E
+  K59: F
+  K64: E
+  K65: F
+  K70: E
+  K71: F
+  K76: E
+  L27: F
+  L33: F
+  L39: F
+  L53: F
+  L59: F
+  L65: F
+  L71: F
+  M06: E
+  M07: E
+  M08: E
+  M09: E
+  M10: E
+  M11: E
+  M12: E
+  M13: E
+  M14: E
+  M15: E
+  M16: E
+  M17: E
+  M21: C
+  M23: C
+  N01: C
+  N02: C
+  N03: E
+  N04: E
+  N05: E
+  N06: E
+  N08: E
+  N09: E
+  N10: E
+  N11: E
+  N31: C
+  N33: C
+  N41: C
+  N43: C
+  N51: C
+  N53: C
+  N63: E
+  N73: E
+  P70: C
+  P71: C
+  P72: C
+  P73: C
+  P74: C
+  P75: C
+  P80: C
+  P81: C
+  P82: C
+  P83: C
+  P84: C
+  P90: E
+  P91: E
+  P92: C
+  P93: C
+  P94: C
+  Q01: E
+  Q02: C
+  Q03: E
+  Q04: C
+  Q05: C
+  Q06: E
+  Q07: C
+  Q08: C
+  Q09: E
+  Q10: C
+  Q11: C
+  Q12: C
+  Q13: E
+  Q14: C
+  Q15: E
+  Q16: C
+  Q17: C
+  Q18: E
+  Q19: C
+  Q20: E
+  Q21: C
+  S06: E
+  S07: C
+  S08: C
+  S09: C
+  S10: E
+  S11: F
+  S12: C
+  S13: E
+  S14: C
+  S15: C
+  S16: E
+  S17: C
+  S18: E
+  S19: C
+  S20: C
+  S21: E
+  S22: C
+  S23: E
+  S24: C
+  S25: E
+  S26: C
+  S27: F
+  S28: C
+  S29: E
+  S30: C
+  S31: C
+  U03: C
+  U04: C
+  U05: C
+  U06: C
+  U07: E
+  U08: C
+  U10: E
+  U11: F
+  U12: F
+  U13: E
+  U14: F
+  U15: E
+  U16: F
+  U17: E
+  W04: E
+  W05: E
+  W06: C
+  W07: C
+  W08: E
+  X01: C
+  X02: C
+  X03: E
+  X04: C
+  X05: C
+  X06: C
+  X07: C
+  X08: E
+  Y01: C
+  Y02: C
+  Y03: E
+  Y04: C
+  Y05: C
+  Y06: C
+  Y07: C
+  Y08: E
+  Z01: C
+  Z02: C
+  Z03: E
+  Z04: C
+  Z05: C
+  Z06: C
+  Z07: E
+  Z09: E
+
+gate_groups:
+  terminal2_a:
+    label: "Terminal 2 - Aire A"
+    gates:
+      - A01
+      - A03
+      - A04
+      - A05
+      - A06
+      - A07
+      - A08
+      - A09
+      - A10
+      - A12
+      - A14
+      - A16
+      - A18
+      - A30
+      - A32
+      - A34
+      - A38
+      - A39
+    airlines: [AAL, ACA, AIZ, BAW, CPA, ELY, FIE, GFA, IRA, KAC, MDG, RJA, THT, UZB]
+  terminal2_b:
+    label: "Terminal 2 - Aire B (2B1+2B2 fusionnes)"
+    gates:
+      - B01
+      - B02
+      - B03
+      - B04
+      - B05
+      - B06
+      - B07
+      - B08
+      - B09
+      - B10
+      - B11
+      - B12
+      - B13
+      - B14
+      - B15
+      - B16
+      - B18
+      - B20
+      - B22
+      - B24
+      - B26
+    airlines: [CTN, CYF, DAH, EJU, EZY, LZB, RAM, REU, ROT]
+  terminal2_c:
+    label: "Terminal 2 - Aire C (+ CFE/CFW/C4A gros porteurs)"
+    gates:
+      - C02
+      - C03
+      - C04
+      - C05
+      - C06
+      - C07
+      - C08
+      - C10
+      - C12
+      - C14
+      - C4A
+      - CF9
+      - CFE
+      - CFW
+    airlines: [AIC, ASL, BAW, ETH, GFA, QFA, TGZ, UZB]
+  terminal2_d:
+    label: "Terminal 2 - Aire D"
+    gates:
+      - D02
+      - D03
+      - D05
+      - D06
+      - D07
+      - D08
+      - D09
+      - D10
+      - D11
+      - D12
+      - D13
+      - D14
+      - D15
+      - D16
+      - D17
+      - D18
+      - D19
+      - D20
+      - D22
+      - D24
+    airlines: [AEE, AMC, BTI, CSA, EJU, FIN, FOX, IBS, IRA, ITY, LOT, NIA, NOZ, NSZ, SAS, SEH, SWR, SZN]
+  terminal2_e:
+    label: "Terminal 2 - Aire E (pier principal)"
+    gates:
+      - E01
+      - E05
+      - E08
+      - E09
+      - E14
+      - E15
+      - E16
+      - E17
+      - E18
+      - E20
+      - E21
+      - E22
+      - E24
+      - E25
+      - E26
+      - E27
+      - E29
+      - E30
+      - E32
+      - E34
+      - E38
+      - E40
+      - E42
+    airlines: [AFR, AMX, DAL, JAL, KAL, KQA, MEA, QFA, SVA, THY, WJA]
+  terminal2_e_s3:
+    label: "Terminal 2E - Satellite 3 (India-Papa I3*)"
+    gates:
+      - I3A
+      - I3B
+      - I3C
+      - I3D
+      - I3F
+      - I3G
+      - I3H
+    airlines: [AFR, AMX, DAL, JAL, LAN, MAU, MEA, ROT, SVA, VTI, WJA]
+  terminal2_e_s4:
+    label: "Terminal 2E - Satellite 4 (I4*)"
+    gates:
+      - I4J
+      - I4K
+      - I4L
+      - I4M
+      - I4N
+      - I4P
+      - I4Q
+      - I4R
+      - I4S
+      - I4T
+      - I4U
+      - I4V
+      - I4W
+      - I4X
+    airlines: [AFR, AMX, DAL, HVN, JAL, MAU, MEA, SVA, WJA]
+  terminal2_f:
+    label: "Terminal 2 - Aire F (2F1+2F2 fusionnes)"
+    gates:
+      - F02
+      - F03
+      - F04
+      - F08
+      - F09
+      - F10
+      - F14
+      - F15
+      - F16
+      - F20
+      - F22
+      - F26
+      - F28
+      - F30
+      - F32
+      - F34
+      - F66
+      - F68
+      - F70
+      - F72
+      - F74
+      - F76
+      - F80
+      - F82
+      - F84
+      - F86
+      - F90
+      - F92
+      - F94
+      - F96
+    airlines: [AFR, KLM]
+  terminal2_g:
+    label: "Terminal 2 - Aire G (court-courrier regional)"
+    gates:
+      - G10
+      - G11
+      - G12
+      - G13
+      - G14
+      - G20
+      - G21
+      - G22
+      - G23
+      - G24
+      - G31
+      - G35
+    airlines: [AFR, LGL]
+  terminal1_uw:
+    label: "Terminal 1 - Satellites U/W"
+    gates:
+      - U03
+      - U04
+      - U05
+      - U06
+      - U07
+      - U08
+      - U10
+      - U11
+      - U12
+      - U13
+      - U14
+      - U15
+      - U16
+      - U17
+      - W04
+      - W05
+      - W06
+      - W07
+      - W08
+    airlines: [AAR, AHY, ALK, ANA, CCA, CHH, CSN, CYP, DTH, EIN, ETD, EVA, FIA, MSR, OMA, QTR, RWD, SIA, SVA, THA, THY, TKJ, UAE]
+  terminal1_x:
+    label: "Terminal 1 - Satellite X"
+    gates:
+      - X01
+      - X02
+      - X03
+      - X04
+      - X05
+      - X06
+      - X07
+      - X08
+    airlines: [AUA, BEL, DLH, EWG, SWR, TWB]
+  terminal1_y:
+    label: "Terminal 1 - Satellite Y"
+    gates:
+      - Y01
+      - Y02
+      - Y03
+      - Y04
+      - Y05
+      - Y06
+      - Y07
+      - Y08
+    airlines: [ICE]
+  terminal1_z:
+    label: "Terminal 1 - Satellite Z"
+    gates:
+      - Z01
+      - Z02
+      - Z03
+      - Z04
+      - Z05
+      - Z06
+      - Z07
+      - Z09
+    airlines: []
+  cargo_m:
+    label: "Zone cargo M"
+    gates:
+      - M06
+      - M07
+      - M08
+      - M09
+      - M10
+      - M11
+      - M12
+      - M13
+      - M14
+      - M15
+      - M16
+      - M17
+      - M21
+      - M23
+    airlines: [AFR, MNB, SRR, THT, UPS]
+  cargo_n:
+    label: "Zone cargo N"
+    gates:
+      - N01
+      - N02
+      - N03
+      - N04
+      - N05
+      - N06
+      - N08
+      - N09
+      - N10
+      - N11
+      - N31
+      - N33
+      - N41
+      - N43
+      - N51
+      - N53
+      - N63
+      - N73
+    airlines: [BCS, CCA, CES, CMA, CPA, GEL, KAL, KQA, QTR, THY, XRC]
+  cargo_p:
+    label: "Zone cargo P"
+    gates:
+      - P70
+      - P71
+      - P72
+      - P73
+      - P74
+      - P75
+      - P80
+      - P81
+      - P82
+      - P83
+      - P84
+      - P90
+      - P91
+      - P92
+      - P93
+      - P94
+    airlines: [ABR, BBD, FPO, KAC, SWN, TSC]
+  zone_r:
+    label: "Zone R"
+    gates:
+      - R01
+      - R02
+      - R03
+      - R04
+      - R05
+      - R06
+      - R07
+      - R08
+      - R09
+      - R10
+      - R11
+      - R12
+      - R13
+      - R14
+      - R39
+    airlines: [CTM]
+  zone_s:
+    label: "Zone S"
+    gates:
+      - S06
+      - S07
+      - S08
+      - S09
+      - S10
+      - S11
+      - S12
+      - S13
+      - S14
+      - S15
+      - S16
+      - S17
+      - S18
+      - S19
+      - S20
+      - S21
+      - S22
+      - S23
+      - S24
+      - S25
+      - S26
+      - S27
+      - S28
+      - S29
+      - S30
+      - S31
+    airlines: [CTM]
+  fedex_india:
+    label: "Aire India (hypothese : zone FedEx du tableau compagnies)"
+    gates:
+      - I04
+      - I05
+      - I06
+      - I09
+      - I10
+      - I11
+      - I14
+      - I15
+      - I16
+      - I17
+      - I18
+      - I19
+      - I20
+      - I21
+      - I22
+      - I23
+      - I24
+      - I25
+      - I26
+      - I27
+      - I30
+      - I31
+      - I32
+      - I33
+      - I34
+      - I35
+      - I36
+      - I37
+      - I38
+      - I39
+      - I40
+      - I41
+      - I42
+      - I43
+      - I44
+      - I45
+      - I46
+      - I47
+      - I48
+      - I49
+      - I50
+      - I51
+      - I52
+      - I53
+      - I54
+      - I55
+      - I60
+      - I61
+      - I62
+      - I63
+      - I64
+      - I65
+      - I66
+      - I67
+      - I68
+      - I69
+      - I70
+      - I71
+      - I72
+      - I73
+      - I74
+      - I75
+      - I76
+      - I77
+      - I78
+      - I79
+      - I80
+      - I81
+      - I82
+      - I83
+      - I84
+      - I85
+      - I86
+      - I90
+      - I91
+    airlines: [ABR, FPO, NPT, SWN, TAY]
